@@ -1,0 +1,6 @@
+# Root Git ignore rules
+run-logs/
+*.log
+.idea/
+.vscode/
+node_modules/

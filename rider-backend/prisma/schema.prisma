@@ -1,0 +1,299 @@
+// -------------------------------
+// Prisma Client Generator
+// -------------------------------
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -------------------------------
+// Datasource
+// -------------------------------
+datasource db {
+  provider = "postgresql"
+}
+
+// -------------------------------
+// ENUMS
+// -------------------------------
+enum UserRole {
+  CUSTOMER
+  DRIVER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  SUSPENDED
+  PENDING
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum OrderStatus {
+  REQUESTED
+  ACCEPTED
+  PICKING_UP
+  EN_ROUTE
+  DESTINATION_REACHED
+  COMPLETED
+  CANCELLED
+}
+
+enum DriverStatus {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
+enum PaymentMethod {
+  CASH
+  WALLET
+}
+
+enum WalletType {
+  CUSTOMER
+  DRIVER
+  PLATFORM
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionSource {
+  PAYSTACK
+  RIDE_PAYMENT
+  WITHDRAWAL
+  ADJUSTMENT
+  WALLET_PAYMENT
+  CASH_PAYMENT
+  TOPUP
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+// -------------------------------
+// MODELS
+// -------------------------------
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  phone        String     @unique
+  name         String
+  passwordHash String
+  role         UserRole
+  status       UserStatus @default(PENDING)
+  isActive     Boolean    @default(true)
+
+  // Relations
+  driver            Driver?
+  orders            Order[]        @relation("CustomerOrders")
+  cancelledOrders   Order[]        @relation("CancelledOrders")
+  wallet            Wallet?
+  devices           UserDevice[]
+  refreshTokens     RefreshToken[]
+  kycs              Kyc[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Driver {
+  id        String  @id @default(uuid())
+  userId    String  @unique
+  isOnline  Boolean @default(false)
+  latitude  Float?
+  longitude Float?
+  status    DriverStatus @default(OFFLINE)
+
+  user   User    @relation(fields: [userId], references: [id])
+  orders Order[] @relation("DriverOrders")
+
+  averageRating Float @default(0)
+  totalRatings  Int   @default(0)
+
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  trackingId String      @unique
+  customerId String
+  driverId   String?
+  status     OrderStatus @default(REQUESTED)
+
+  pickupLat Float
+  pickupLng Float
+  dropLat   Float
+  dropLng   Float
+  price          Float
+  pickupAddress  String?
+  dropoffAddress String?
+  paymentMethod  PaymentMethod @default(CASH)
+  quotedDistanceKm      Float?
+  quotedDurationMinutes Int?
+  baseFare              Float?
+  distanceFare          Float?
+  serviceFee            Float?
+  priorityFee           Float @default(0)
+  pickupCode            String?
+  dropoffCode           String?
+
+  // B2B Fields
+  pickupCompanyName  String?
+  dropoffCompanyName String?
+  itemType           String?  // Document, Parcel, Fragile, etc.
+  weight             Float?
+  packageImages      String[] @default([])
+  recipientName      String?
+  recipientPhone     String?
+  deliveryInstructions String?
+  proofOfDelivery    String?  // Signature or photo URL
+
+  rejectedBy    String[] @default([])
+
+  cancelledById String?
+  cancelReason  String?
+  cancelStage   OrderStatus?
+  cancelledAt   DateTime?
+
+  scheduledAt DateTime?
+  driverAcceptedAt DateTime?
+  pickedUpAt        DateTime?
+  deliveredAt       DateTime?
+  
+  customer    User    @relation("CustomerOrders", fields: [customerId], references: [id])
+  driver      Driver? @relation("DriverOrders", fields: [driverId], references: [id])
+  cancelledBy User?   @relation("CancelledOrders", fields: [cancelledById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rating        Float?
+  ratingComment String?
+
+  messages Message[]
+
+  @@index([customerId])
+  @@index([driverId])
+  @@index([status])
+}
+
+model Wallet {
+  id        String     @id @default(uuid())
+  userId    String?    @unique
+  type      WalletType
+  balance   Float      @default(0)
+  frozen    Boolean    @default(false)
+
+  user         User?        @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  withdrawals  Withdrawal[]
+  fraudLogs    FraudLog[]
+
+  createdAt DateTime @default(now())
+}
+
+model Transaction {
+  id        String            @id @default(uuid())
+  walletId  String
+  amount    Float
+  type      TransactionType
+  source    TransactionSource
+  reference String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+
+  @@index([walletId])
+}
+
+model Withdrawal {
+  id        String           @id @default(uuid())
+  driverId  String
+  walletId  String
+  amount    Float
+  status    WithdrawalStatus @default(PENDING)
+  reason    String?
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FraudLog {
+  id        String   @id @default(uuid())
+  walletId  String
+  reason    String
+  resolved  Boolean @default(false)
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Kyc {
+  id        String     @id @default(uuid())
+  userId    String
+  type      String     // DRIVER | CUSTOMER
+  documents Json
+  selfie    String?
+  status    KycStatus  @default(PENDING)
+  reason    String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  revoked   Boolean  @default(false)
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model UserDevice {
+  id         String   @id @default(uuid())
+  userId     String
+  deviceId   String
+  deviceName String?
+  lastIp     String?
+  lastLogin  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, deviceId])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  orderId   String
+  senderId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}

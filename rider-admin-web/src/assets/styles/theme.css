@@ -1,0 +1,16 @@
+body {
+  background:
+    radial-gradient(circle at top left, rgba(239, 108, 0, 0.18), transparent 26%),
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.2), transparent 24%),
+    linear-gradient(160deg, #f9f0e6 0%, #fffaf4 46%, #f5ecdf 100%);
+  color: var(--text);
+}
+
+.card,
+.metric-card,
+.chart-card {
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}

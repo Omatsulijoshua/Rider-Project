@@ -1,0 +1,71 @@
+com.example.rider.app-jetified-emoji2-views-helper-1.2.0-0 C:\Users\SirBill's\.gradle\caches\transforms-4\01e43ec88bab394c6c81039e5429e918\transformed\jetified-emoji2-views-helper-1.2.0\res
+com.example.rider.app-jetified-fragment-ktx-1.7.1-1 C:\Users\SirBill's\.gradle\caches\transforms-4\03d0a9f2e3ee26775e1376eba08b9916\transformed\jetified-fragment-ktx-1.7.1\res
+com.example.rider.app-jetified-window-1.2.0-2 C:\Users\SirBill's\.gradle\caches\transforms-4\1bff0d1f90b0194ebae75fcc07f5ec04\transformed\jetified-window-1.2.0\res
+com.example.rider.app-jetified-window-java-1.2.0-3 C:\Users\SirBill's\.gradle\caches\transforms-4\2bb0d5ddba90defe0fde271d4eebfc3a\transformed\jetified-window-java-1.2.0\res
+com.example.rider.app-jetified-activity-1.8.1-4 C:\Users\SirBill's\.gradle\caches\transforms-4\2d5d20f4b8a0aec7fa1aec7f603f5ba6\transformed\jetified-activity-1.8.1\res
+com.example.rider.app-core-1.13.1-5 C:\Users\SirBill's\.gradle\caches\transforms-4\355baa394de5f81cbae9105356bdf2c2\transformed\core-1.13.1\res
+com.example.rider.app-jetified-tracing-1.2.0-6 C:\Users\SirBill's\.gradle\caches\transforms-4\387fffc771c0b4593eaa14bab48c311b\transformed\jetified-tracing-1.2.0\res
+com.example.rider.app-jetified-credentials-1.2.0-rc01-7 C:\Users\SirBill's\.gradle\caches\transforms-4\388ff3eece8ef90edef1dcb1a8d2f467\transformed\jetified-credentials-1.2.0-rc01\res
+com.example.rider.app-jetified-datastore-core-release-8 C:\Users\SirBill's\.gradle\caches\transforms-4\39f2fe16084f1017373e79dde52533ab\transformed\jetified-datastore-core-release\res
+com.example.rider.app-jetified-annotation-experimental-1.4.0-9 C:\Users\SirBill's\.gradle\caches\transforms-4\3cf295c607789976e1a78cca78b5a050\transformed\jetified-annotation-experimental-1.4.0\res
+com.example.rider.app-recyclerview-1.0.0-10 C:\Users\SirBill's\.gradle\caches\transforms-4\43aceb2d11e344c1b1548e9af11d0319\transformed\recyclerview-1.0.0\res
+com.example.rider.app-jetified-core-1.0.10-11 C:\Users\SirBill's\.gradle\caches\transforms-4\446c896bf627568e5fb79c74edba4768\transformed\jetified-core-1.0.10\res
+com.example.rider.app-jetified-core-ktx-1.13.1-12 C:\Users\SirBill's\.gradle\caches\transforms-4\47089700c98a66198b182bb6033e080e\transformed\jetified-core-ktx-1.13.1\res
+com.example.rider.app-swiperefreshlayout-1.1.0-13 C:\Users\SirBill's\.gradle\caches\transforms-4\48ab99603249303c1085e8db4dda6358\transformed\swiperefreshlayout-1.1.0\res
+com.example.rider.app-core-runtime-2.2.0-14 C:\Users\SirBill's\.gradle\caches\transforms-4\5837aad9035b50463178289e8bc294dc\transformed\core-runtime-2.2.0\res
+com.example.rider.app-jetified-core-1.0.0-15 C:\Users\SirBill's\.gradle\caches\transforms-4\5b1f040f768bfe7afe3762a19f1012c6\transformed\jetified-core-1.0.0\res
+com.example.rider.app-jetified-datastore-preferences-release-16 C:\Users\SirBill's\.gradle\caches\transforms-4\5be566c2a9c1fd728fc51494bec0f2b3\transformed\jetified-datastore-preferences-release\res
+com.example.rider.app-jetified-datastore-release-17 C:\Users\SirBill's\.gradle\caches\transforms-4\6ae602734ba1df1394be395af4016da4\transformed\jetified-datastore-release\res
+com.example.rider.app-transition-1.4.1-18 C:\Users\SirBill's\.gradle\caches\transforms-4\6ca05766a9c148750f350770fe483275\transformed\transition-1.4.1\res
+com.example.rider.app-preference-1.2.1-19 C:\Users\SirBill's\.gradle\caches\transforms-4\6dc36644fc5178b069b63929da94801d\transformed\preference-1.2.1\res
+com.example.rider.app-jetified-play-services-maps-17.0.0-20 C:\Users\SirBill's\.gradle\caches\transforms-4\726cad56a818561eb1cd2d17f5ba8435\transformed\jetified-play-services-maps-17.0.0\res
+com.example.rider.app-jetified-startup-runtime-1.1.1-21 C:\Users\SirBill's\.gradle\caches\transforms-4\742ea636db34919ff875baba656f7150\transformed\jetified-startup-runtime-1.1.1\res
+com.example.rider.app-appcompat-1.6.1-22 C:\Users\SirBill's\.gradle\caches\transforms-4\7bfc317aae39f6348c1e03f214513b1d\transformed\appcompat-1.6.1\res
+com.example.rider.app-jetified-credentials-play-services-auth-1.2.0-rc01-23 C:\Users\SirBill's\.gradle\caches\transforms-4\7e1be69670c1b70b2a4a07c7c1dce6b4\transformed\jetified-credentials-play-services-auth-1.2.0-rc01\res
+com.example.rider.app-jetified-firebase-common-22.0.1-24 C:\Users\SirBill's\.gradle\caches\transforms-4\81c53b1c22a61d38a8b35bf7076569dd\transformed\jetified-firebase-common-22.0.1\res
+com.example.rider.app-jetified-savedstate-ktx-1.2.1-25 C:\Users\SirBill's\.gradle\caches\transforms-4\8509e3856e77e09ff0592521ee3c8489\transformed\jetified-savedstate-ktx-1.2.1\res
+com.example.rider.app-jetified-emoji2-1.2.0-26 C:\Users\SirBill's\.gradle\caches\transforms-4\865fcc6748e5ff8e84177ba90063a657\transformed\jetified-emoji2-1.2.0\res
+com.example.rider.app-jetified-standard-core-1.7.10-27 C:\Users\SirBill's\.gradle\caches\transforms-4\88c8a23e26a31691bf449292b4196a13\transformed\jetified-standard-core-1.7.10\res
+com.example.rider.app-webkit-1.12.0-28 C:\Users\SirBill's\.gradle\caches\transforms-4\90ae51a3ce7e125b5d20a456ab89d922\transformed\webkit-1.12.0\res
+com.example.rider.app-jetified-lifecycle-process-2.7.0-29 C:\Users\SirBill's\.gradle\caches\transforms-4\9cc15cf60898e7ad84b51cf7091c869c\transformed\jetified-lifecycle-process-2.7.0\res
+com.example.rider.app-jetified-play-services-auth-21.1.0-30 C:\Users\SirBill's\.gradle\caches\transforms-4\a149b00f583acbc6981c943f79a2a69b\transformed\jetified-play-services-auth-21.1.0\res
+com.example.rider.app-jetified-lifecycle-viewmodel-ktx-2.7.0-31 C:\Users\SirBill's\.gradle\caches\transforms-4\a2ffb21606d92a511bc398498adf09cc\transformed\jetified-lifecycle-viewmodel-ktx-2.7.0\res
+com.example.rider.app-jetified-datastore-preferences-core-release-32 C:\Users\SirBill's\.gradle\caches\transforms-4\a75c3353806d36ff1507156af8d199bb\transformed\jetified-datastore-preferences-core-release\res
+com.example.rider.app-jetified-lifecycle-viewmodel-savedstate-2.7.0-33 C:\Users\SirBill's\.gradle\caches\transforms-4\aba86587890fdc223b9e7177f4288673\transformed\jetified-lifecycle-viewmodel-savedstate-2.7.0\res
+com.example.rider.app-exifinterface-1.4.1-34 C:\Users\SirBill's\.gradle\caches\transforms-4\b84fc0f6765433ecad8e0191725f6e0c\transformed\exifinterface-1.4.1\res
+com.example.rider.app-jetified-savedstate-1.2.1-35 C:\Users\SirBill's\.gradle\caches\transforms-4\ba5af73e83b6c50b20c2fef1641bbe84\transformed\jetified-savedstate-1.2.1\res
+com.example.rider.app-jetified-core-common-2.0.3-36 C:\Users\SirBill's\.gradle\caches\transforms-4\bcafc458ad3f5f5145379a51bba68c24\transformed\jetified-core-common-2.0.3\res
+com.example.rider.app-lifecycle-viewmodel-2.7.0-37 C:\Users\SirBill's\.gradle\caches\transforms-4\bde9d123e6eaf84abd953fbbee90549e\transformed\lifecycle-viewmodel-2.7.0\res
+com.example.rider.app-browser-1.8.0-38 C:\Users\SirBill's\.gradle\caches\transforms-4\ca43ba4f7a9654774f5397c663b53a69\transformed\browser-1.8.0\res
+com.example.rider.app-jetified-activity-ktx-1.8.1-39 C:\Users\SirBill's\.gradle\caches\transforms-4\ca9d7d5cbeb9e05504d71d12fefaa078\transformed\jetified-activity-ktx-1.8.1\res
+com.example.rider.app-jetified-appcompat-resources-1.6.1-40 C:\Users\SirBill's\.gradle\caches\transforms-4\cb72312e6e107e3038bea44a99f40a2c\transformed\jetified-appcompat-resources-1.6.1\res
+com.example.rider.app-jetified-play-services-base-18.3.0-41 C:\Users\SirBill's\.gradle\caches\transforms-4\cc2432851dc3be9f68048f77fca70044\transformed\jetified-play-services-base-18.3.0\res
+com.example.rider.app-jetified-profileinstaller-1.3.1-42 C:\Users\SirBill's\.gradle\caches\transforms-4\cd224df933b5d24ee0b7a0b054ffb79c\transformed\jetified-profileinstaller-1.3.1\res
+com.example.rider.app-fragment-1.7.1-43 C:\Users\SirBill's\.gradle\caches\transforms-4\ce0915e8dbfca67ba84ae8b7e3e111dc\transformed\fragment-1.7.1\res
+com.example.rider.app-coordinatorlayout-1.0.0-44 C:\Users\SirBill's\.gradle\caches\transforms-4\cfd454eb6fb203c637bf51c883d03ee7\transformed\coordinatorlayout-1.0.0\res
+com.example.rider.app-jetified-play-services-basement-18.8.0-45 C:\Users\SirBill's\.gradle\caches\transforms-4\d2bf56d51ccc3bc30fdb679c407db960\transformed\jetified-play-services-basement-18.8.0\res
+com.example.rider.app-lifecycle-livedata-core-2.7.0-46 C:\Users\SirBill's\.gradle\caches\transforms-4\d546878e4d294befa2345080b3dae528\transformed\lifecycle-livedata-core-2.7.0\res
+com.example.rider.app-jetified-play-services-wallet-18.1.3-47 C:\Users\SirBill's\.gradle\caches\transforms-4\d78412c3b3131609fe096fe2234dabd0\transformed\jetified-play-services-wallet-18.1.3\res
+com.example.rider.app-jetified-lifecycle-livedata-core-ktx-2.7.0-48 C:\Users\SirBill's\.gradle\caches\transforms-4\d8d94979efca140a35b668095c11a635\transformed\jetified-lifecycle-livedata-core-ktx-2.7.0\res
+com.example.rider.app-slidingpanelayout-1.2.0-49 C:\Users\SirBill's\.gradle\caches\transforms-4\efc1bb757b086f7d48e608eaab847844\transformed\slidingpanelayout-1.2.0\res
+com.example.rider.app-jetified-lifecycle-runtime-ktx-2.7.0-50 C:\Users\SirBill's\.gradle\caches\transforms-4\fbdf9c5afbbb2410b90a7a75299bf0b3\transformed\jetified-lifecycle-runtime-ktx-2.7.0\res
+com.example.rider.app-lifecycle-runtime-2.7.0-51 C:\Users\SirBill's\.gradle\caches\transforms-4\fc256f7b900a5f14c1897b7b6038b7ae\transformed\lifecycle-runtime-2.7.0\res
+com.example.rider.app-release-52 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore-6.1.1\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-release-53 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\device_info_plus-12.4.0\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-release-54 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth-6.1.3\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-release-55 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core-4.3.0\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-release-56 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\flutter_inappwebview_android-1.1.3\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-release-57 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\flutter_webrtc-1.4.1\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-release-58 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\fluttertoast-8.2.14\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-release-59 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\jni-1.0.0\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-release-60 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\jni_flutter-1.0.1\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-release-61 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\razorpay_flutter-1.4.0\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-release-62 C:\Users\SirBill's\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.18\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.example.rider.app-pngs-63 C:\Users\SirBill's\StudioProjects\Rider Projet\Rider\android\app\build\generated\res\pngs\release
+com.example.rider.app-res-64 C:\Users\SirBill's\StudioProjects\Rider Projet\Rider\android\app\build\generated\res\processReleaseGoogleServices
+com.example.rider.app-resValues-65 C:\Users\SirBill's\StudioProjects\Rider Projet\Rider\android\app\build\generated\res\resValues\release
+com.example.rider.app-packageReleaseResources-66 C:\Users\SirBill's\StudioProjects\Rider Projet\Rider\android\app\build\intermediates\incremental\release\packageReleaseResources\merged.dir
+com.example.rider.app-packageReleaseResources-67 C:\Users\SirBill's\StudioProjects\Rider Projet\Rider\android\app\build\intermediates\incremental\release\packageReleaseResources\stripped.dir
+com.example.rider.app-release-68 C:\Users\SirBill's\StudioProjects\Rider Projet\Rider\android\app\build\intermediates\merged_res\release\mergeReleaseResources
+com.example.rider.app-main-69 C:\Users\SirBill's\StudioProjects\Rider Projet\Rider\android\app\src\main\res
+com.example.rider.app-release-70 C:\Users\SirBill's\StudioProjects\Rider Projet\Rider\android\app\src\release\res

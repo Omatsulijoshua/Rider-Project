@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "514833924165",
+    "project_id": "raiderapp-10f77",
+    "storage_bucket": "raiderapp-10f77.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:514833924165:android:3650abf736d94850ad232c",
+        "android_client_info": {
+          "package_name": "com.example.riderapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj81zSUCzBF1wjIct0gUSt4mIjHa9sMGs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:514833924165:android:bd43c8a3f6f9172aad232c",
+        "android_client_info": {
+          "package_name": "com.rider.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj81zSUCzBF1wjIct0gUSt4mIjHa9sMGs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

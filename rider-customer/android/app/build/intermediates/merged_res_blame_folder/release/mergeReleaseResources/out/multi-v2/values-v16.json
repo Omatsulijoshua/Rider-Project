@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.example.rider.app-mergeReleaseResources-66:/values-v16/values-v16.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\SirBill's\\.gradle\\caches\\transforms-4\\7bfc317aae39f6348c1e03f214513b1d\\transformed\\appcompat-1.6.1\\res\\values-v16\\values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "5",
+                        "endColumns": "12",
+                        "endOffsets": "223"
+                    }
+                }
+            ]
+        }
+    ]
+}

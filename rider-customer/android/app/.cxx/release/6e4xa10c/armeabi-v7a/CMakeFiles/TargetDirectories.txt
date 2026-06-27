@@ -1,0 +1,2 @@
+C:/Users/SirBill's/StudioProjects/Rider Projet/Rider/android/app/.cxx/release/6e4xa10c/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/SirBill's/StudioProjects/Rider Projet/Rider/android/app/.cxx/release/6e4xa10c/armeabi-v7a/CMakeFiles/rebuild_cache.dir

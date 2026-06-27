@@ -1,0 +1,1 @@
+C:\Users\SirBill's\StudioProjects\Rider Projet\Rider\android\app\build\intermediates\cxx\release\214u5d1e\obj\arm64-v8a

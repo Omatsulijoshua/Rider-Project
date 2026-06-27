@@ -1,0 +1,45 @@
+# -----------------------------
+# Fix Gradle Cache Permissions and Locks
+# -----------------------------
+
+# Set Gradle cache path
+$GradleCache = "D:\GradleCache"
+
+# Close all Java and Gradle processes
+Write-Host "Closing all java.exe and gradle.exe processes..."
+taskkill /F /IM java.exe /T -ErrorAction SilentlyContinue
+taskkill /F /IM gradle.exe /T -ErrorAction SilentlyContinue
+
+# Wait a moment
+Start-Sleep -Seconds 2
+
+# Take ownership of Gradle cache
+Write-Host "Setting permissions for Gradle cache folder..."
+icacls $GradleCache /grant "$env:USERNAME:(OI)(CI)F" /T
+
+# Remove old/broken Gradle dist folders
+$GradleDistFolder = Join-Path $GradleCache "wrapper\dists"
+if (Test-Path $GradleDistFolder) {
+    Write-Host "Removing old Gradle dist folders..."
+    Remove-Item "$GradleDistFolder\*" -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+# Remove leftover .lck files
+Write-Host "Cleaning lock files..."
+Get-ChildItem -Path $GradleCache -Recurse -Include "*.lck" | Remove-Item -Force -ErrorAction SilentlyContinue
+
+# Optional: Clean Flutter project
+Write-Host "Cleaning Flutter project..."
+flutter clean
+
+# Repair pub cache
+Write-Host "Repairing Flutter pub cache..."
+flutter pub cache repair
+
+# Get Flutter dependencies
+Write-Host "Fetching Flutter packages..."
+flutter pub get
+
+# Notify user
+Write-Host "? Gradle cache and Flutter project are now cleaned and ready."
+Write-Host "You can now run your app: flutter run -d <device_id>"

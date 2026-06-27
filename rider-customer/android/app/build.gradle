@@ -1,0 +1,101 @@
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    id "com.google.gms.google-services"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+
+
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace "com.example.rider"
+    ndkVersion = "28.2.13676358"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.example.rider"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+            // Explicit APK configuration
+            packagingOptions {
+                // Ensure APK is properly generated
+            }
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/androidx.*.version'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
+}
+
+afterEvaluate {
+    tasks.matching { it.name == 'assembleRelease' }.all { assembleTask ->
+        assembleTask.doLast {
+            def sourceApk = file("${buildDir}/outputs/flutter-apk/app-release.apk")
+            if (sourceApk.exists()) {
+                def target1 = file("$rootDir/../build/app/outputs/flutter-apk")
+                def target2 = file("$rootDir/../build/app/outputs/apk/release")
+                target1.mkdirs()
+                target2.mkdirs()
+                copy {
+                    from sourceApk
+                    into target1
+                    rename { 'app-release.apk' }
+                }
+                copy {
+                    from sourceApk
+                    into target2
+                    rename { 'app-release.apk' }
+                }
+                println "✅ Copied APK to Flutter expected locations:"
+                println "   ${target1.absolutePath}/app-release.apk"
+                println "   ${target2.absolutePath}/app-release.apk"
+            } else {
+                println "⚠️ Source APK not found at: ${sourceApk.absolutePath}"
+            }
+        }
+    }
+}
+
+flutter {
+    source "../.."
+}
