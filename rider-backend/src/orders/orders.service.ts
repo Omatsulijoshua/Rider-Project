@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { DriverStatus, OrderStatus } from '@prisma/client';
+import { DriverStatus, OrderStatus, WalletType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from '../wallet/wallet.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -234,8 +234,15 @@ export class OrdersService {
       where: { userId: driverId },
     });
     if (!driver) throw new NotFoundException('Driver not found');
-    if (!driver.isOnline || driver.status !== DriverStatus.AVAILABLE) {
-      throw new BadRequestException('Driver must be online and available to accept orders');
+    if (!driver.isOnline || driver.status === DriverStatus.OFFLINE) {
+      throw new BadRequestException('Driver must be online to accept orders');
+    }
+
+    if (driver.status !== DriverStatus.AVAILABLE) {
+      const routeMatched = await this.canAcceptRouteMatchedJob(driver.id, order);
+      if (!routeMatched) {
+        throw new BadRequestException('Driver can only accept another job when it matches the active route');
+      }
     }
 
     const updatedOrder = await this.prisma.order.update({
@@ -253,7 +260,7 @@ export class OrdersService {
 
     await this.prisma.driver.update({
       where: { id: driver.id },
-      data: { status: DriverStatus.BUSY },
+      data: { status: DriverStatus.BUSY, lastActiveAt: new Date() },
     });
 
     this.ordersGateway.emitOrderUpdate(orderId, OrderStatus.ACCEPTED, {
@@ -311,9 +318,17 @@ export class OrdersService {
         totalPrice: updatedOrder.price,
       });
 
+      const activeJobs = await this.countActiveDriverOrders(updatedOrder.driverId);
       await this.prisma.driver.update({
         where: { id: updatedOrder.driverId },
-        data: { status: DriverStatus.AVAILABLE },
+        data: { status: activeJobs > 0 ? DriverStatus.ON_DELIVERY : DriverStatus.AVAILABLE },
+      });
+    }
+
+    if (status === OrderStatus.EN_ROUTE && updatedOrder.driverId) {
+      await this.prisma.driver.update({
+        where: { id: updatedOrder.driverId },
+        data: { status: DriverStatus.ON_DELIVERY, lastActiveAt: new Date() },
       });
     }
 
@@ -341,10 +356,23 @@ export class OrdersService {
     });
 
     if (order.driverId) {
+      const driver = await this.prisma.driver.findUnique({
+        where: { id: order.driverId },
+      });
+      const activeJobs = await this.countActiveDriverOrders(order.driverId);
+
       await this.prisma.driver.update({
         where: { id: order.driverId },
-        data: { status: DriverStatus.AVAILABLE },
+        data: { status: activeJobs > 0 ? DriverStatus.ON_DELIVERY : DriverStatus.AVAILABLE },
       });
+
+      if (driver?.userId === userId && order.status !== OrderStatus.REQUESTED) {
+        await this.createDriverFraudSignal(
+          userId,
+          'Driver accepted customer contact then cancelled the delivery',
+          15,
+        );
+      }
     }
 
     this.ordersGateway.emitOrderUpdate(orderId, OrderStatus.CANCELLED, { reason });
@@ -474,6 +502,72 @@ export class OrdersService {
 
   private roundMoney(value: number) {
     return Math.round(value * 100) / 100;
+  }
+
+  private async countActiveDriverOrders(driverId: string) {
+    return this.prisma.order.count({
+      where: {
+        driverId,
+        status: {
+          in: [
+            OrderStatus.ACCEPTED,
+            OrderStatus.PICKING_UP,
+            OrderStatus.EN_ROUTE,
+            OrderStatus.DESTINATION_REACHED,
+          ],
+        },
+      },
+    });
+  }
+
+  private async canAcceptRouteMatchedJob(driverId: string, order: { pickupLat: number; pickupLng: number; dropLat: number; dropLng: number }) {
+    const activeOrders = await this.prisma.order.findMany({
+      where: {
+        driverId,
+        status: {
+          in: [OrderStatus.ACCEPTED, OrderStatus.PICKING_UP, OrderStatus.EN_ROUTE],
+        },
+      },
+      select: { pickupLat: true, pickupLng: true, dropLat: true, dropLng: true },
+    });
+
+    if (activeOrders.length === 0) return true;
+    if (activeOrders.length >= 3) return false;
+
+    return activeOrders.some((activeOrder) => {
+      const pickupDistance = this.calculateDistance(
+        activeOrder.pickupLat,
+        activeOrder.pickupLng,
+        order.pickupLat,
+        order.pickupLng,
+      );
+      const dropoffDistance = this.calculateDistance(
+        activeOrder.dropLat,
+        activeOrder.dropLng,
+        order.dropLat,
+        order.dropLng,
+      );
+
+      return pickupDistance <= 8 && dropoffDistance <= 12;
+    });
+  }
+
+  private async createDriverFraudSignal(userId: string, reason: string, scoreIncrease: number) {
+    const wallet = await this.prisma.wallet.upsert({
+      where: { userId },
+      update: {},
+      create: { userId, type: WalletType.DRIVER },
+    });
+
+    await this.prisma.$transaction([
+      this.prisma.driver.update({
+        where: { userId },
+        data: { fraudScore: { increment: scoreIncrease } },
+      }),
+      this.prisma.fraudLog.create({
+        data: { walletId: wallet.id, reason },
+      }),
+    ]);
   }
 
   private generateVerificationCode() {

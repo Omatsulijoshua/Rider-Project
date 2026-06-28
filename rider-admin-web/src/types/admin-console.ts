@@ -36,6 +36,33 @@ export type AdminConsoleDriver = {
   createdAt: string;
   walletBalance: number;
   totalOrders: number;
+  driverStatus: string;
+  vehicleType: string;
+  rating: number;
+  completedJobs: number;
+  fraudScore: number;
+  latitude: number | null;
+  longitude: number | null;
+  lastActiveAt: string | null;
+};
+
+export type AdminConsoleLiveDriver = {
+  id: string;
+  userId: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  isOnline: boolean;
+  status: string;
+  vehicleType: string;
+  rating: number;
+  completedJobs: number;
+  fraudScore: number;
+  lat: number | null;
+  lng: number | null;
+  lastActiveAt: string | null;
+  activeDeliveryCount: number;
+  offlineDuringDelivery: boolean;
 };
 
 export type AdminConsoleRide = {
@@ -96,6 +123,7 @@ export type AdminConsoleData = {
   revenueTrend: AdminConsolePoint[];
   customers: AdminConsoleCustomer[];
   drivers: AdminConsoleDriver[];
+  liveDrivers: AdminConsoleLiveDriver[];
   rides: AdminConsoleRide[];
   wallets: AdminConsoleWallet[];
   payouts: AdminConsolePayout[];

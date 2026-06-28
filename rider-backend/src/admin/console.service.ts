@@ -71,7 +71,48 @@ export class AdminConsoleService {
         createdAt: driver.createdAt,
         walletBalance: wallets.find((wallet) => wallet.userId === driver.userId)?.balance ?? 0,
         totalOrders: orders.filter((order) => order.driverId === driver.id).length,
+        driverStatus: driver.status,
+        vehicleType: driver.vehicleType ?? 'bike',
+        rating: driver.averageRating,
+        completedJobs: driver.totalRatings,
+        fraudScore: driver.fraudScore,
+        latitude: driver.latitude,
+        longitude: driver.longitude,
+        lastActiveAt: driver.lastActiveAt,
       })),
+      liveDrivers: drivers
+        .filter((driver) => driver.latitude !== null && driver.longitude !== null)
+        .map((driver) => {
+          const activeDeliveries = orders.filter(
+            (order) =>
+              order.driverId === driver.id &&
+              [
+                OrderStatus.ACCEPTED,
+                OrderStatus.PICKING_UP,
+                OrderStatus.EN_ROUTE,
+                OrderStatus.DESTINATION_REACHED,
+              ].includes(order.status),
+          );
+
+          return {
+            id: driver.id,
+            userId: driver.userId,
+            name: driver.user.name,
+            phone: driver.user.phone,
+            email: driver.user.email,
+            isOnline: driver.isOnline,
+            status: driver.status,
+            vehicleType: driver.vehicleType ?? 'bike',
+            rating: driver.averageRating,
+            completedJobs: driver.totalRatings,
+            fraudScore: driver.fraudScore,
+            lat: driver.latitude,
+            lng: driver.longitude,
+            lastActiveAt: driver.lastActiveAt,
+            activeDeliveryCount: activeDeliveries.length,
+            offlineDuringDelivery: !driver.isOnline && activeDeliveries.length > 0,
+          };
+        }),
       rides: orders.map((order) => ({
         id: order.id,
         status: order.status,
@@ -88,6 +129,8 @@ export class AdminConsoleService {
         id: wallet.id,
         ownerPhone: wallet.user?.phone ?? null,
         ownerEmail: wallet.user?.email ?? null,
+        type: wallet.type,
+        frozen: wallet.frozen,
         balance: wallet.balance,
         createdAt: wallet.createdAt,
         withdrawalCount: wallet.withdrawals.length,

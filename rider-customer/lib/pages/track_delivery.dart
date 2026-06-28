@@ -14,6 +14,8 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
   late IO.Socket socket;
   late String _status;
   Map<String, double>? _driverLocation;
+  Map<String, dynamic>? _driverProfile;
+  int? _etaMinutes;
   String? _podUrl;
 
   @override
@@ -44,6 +46,9 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
       if (mounted) {
         setState(() {
           _status = data['status'];
+          if (data['driver'] != null) {
+            _driverProfile = Map<String, dynamic>.from(data['driver']);
+          }
           if (data['proofOfDelivery'] != null) {
             _podUrl = data['proofOfDelivery'];
           }
@@ -58,6 +63,10 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
             'lat': data['lat'],
             'lng': data['lng'],
           };
+          if (data['driver'] != null) {
+            _driverProfile = Map<String, dynamic>.from(data['driver']);
+          }
+          _etaMinutes = data['etaMinutes'];
         });
       }
     });
@@ -80,6 +89,8 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
         child: Column(
           children: [
             _buildStatusHeader(),
+            const SizedBox(height: 30),
+            _buildDriverProfileCard(),
             const SizedBox(height: 30),
             _buildTrackingTimeline(),
             const SizedBox(height: 30),
@@ -187,6 +198,76 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildDriverProfileCard() {
+    final profile = _driverProfile ?? widget.order['driver'];
+    final onlineStatus = profile is Map ? profile['status'] ?? 'ASSIGNED' : 'ASSIGNED';
+    final vehicleType = profile is Map ? profile['vehicleType'] ?? 'vehicle' : 'vehicle';
+    final rating = profile is Map ? profile['rating'] ?? profile['averageRating'] ?? 0 : 0;
+    final completedJobs = profile is Map ? profile['completedJobs'] ?? profile['totalRatings'] ?? 0 : 0;
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const CircleAvatar(
+                  backgroundColor: Color(0xff6053f8),
+                  child: Icon(Icons.delivery_dining, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Assigned driver",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      Text(
+                        "$vehicleType / $onlineStatus",
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_etaMinutes != null)
+                  Chip(
+                    label: Text("ETA $_etaMinutes min"),
+                    backgroundColor: const Color(0xff6053f8).withOpacity(0.12),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _driverMetric("Rating", double.tryParse("$rating")?.toStringAsFixed(1) ?? "0.0"),
+                _driverMetric("Completed", "$completedJobs jobs"),
+                _driverMetric("Tracking", _driverLocation == null ? "Waiting" : "Live"),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _driverMetric(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+      ],
     );
   }
 

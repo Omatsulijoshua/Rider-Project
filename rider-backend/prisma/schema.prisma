@@ -47,6 +47,7 @@ enum OrderStatus {
 enum DriverStatus {
   AVAILABLE
   BUSY
+  ON_DELIVERY
   OFFLINE
 }
 
@@ -117,6 +118,10 @@ model Driver {
   latitude  Float?
   longitude Float?
   status    DriverStatus @default(OFFLINE)
+  vehicleType String?
+  lastActiveAt DateTime?
+  locationDisabledAt DateTime?
+  fraudScore Int @default(0)
 
   user   User    @relation(fields: [userId], references: [id])
   orders Order[] @relation("DriverOrders")

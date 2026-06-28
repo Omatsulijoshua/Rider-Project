@@ -17,12 +17,33 @@ class _SearchingRiderPageState extends State<SearchingRiderPage> {
   late IO.Socket socket;
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isFound = false;
+  List<dynamic> _nearbyDrivers = [];
 
   @override
   void initState() {
     super.initState();
     _connectSocket();
     _playSearchingSound();
+    _loadNearbyDrivers();
+  }
+
+  Future<void> _loadNearbyDrivers() async {
+    try {
+      final pickupLat = widget.order['pickupLat'];
+      final pickupLng = widget.order['pickupLng'];
+      if (pickupLat == null || pickupLng == null) return;
+
+      final response = await ApiClient().get(
+        '/drivers/nearby?lat=$pickupLat&lng=$pickupLng&radiusKm=12',
+        requireAuth: false,
+      );
+
+      if (mounted && response is List) {
+        setState(() => _nearbyDrivers = response);
+      }
+    } catch (e) {
+      print("Nearby drivers error: $e");
+    }
   }
 
   Future<void> _playSearchingSound() async {
@@ -59,6 +80,26 @@ class _SearchingRiderPageState extends State<SearchingRiderPage> {
     socket.onConnect((_) {
       print('Customer Socket Connected: ${socket.id}');
       socket.emit('joinOrder', widget.order['id']);
+      socket.emit('watchNearbyDrivers', {
+        'lat': widget.order['pickupLat'],
+        'lng': widget.order['pickupLng'],
+        'radiusKm': 12,
+      });
+    });
+
+    socket.on('nearbyDriverUpdate', (data) {
+      if (!mounted) return;
+      setState(() {
+        _nearbyDrivers.removeWhere((driver) => driver['id'] == data['id']);
+        _nearbyDrivers.insert(0, data);
+      });
+    });
+
+    socket.on('nearbyDriverUnavailable', (data) {
+      if (!mounted) return;
+      setState(() {
+        _nearbyDrivers.removeWhere((driver) => driver['id'] == data['id']);
+      });
     });
 
     socket.on('orderUpdate', (data) {
@@ -173,6 +214,54 @@ class _SearchingRiderPageState extends State<SearchingRiderPage> {
                     ],
                   ),
                 ),
+              if (!_isFound && _nearbyDrivers.isNotEmpty) ...[
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Nearby available drivers",
+                        style: TextStyle(
+                          color: Color(0xff1f1b2d),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ..._nearbyDrivers.take(3).map((driver) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.delivery_dining, color: Color(0xff6053f8)),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  "${driver['vehicleType'] ?? 'vehicle'} / ${driver['rating'] ?? 0} rating / ${driver['completedJobs'] ?? 0} jobs",
+                                  style: const TextStyle(color: Color(0xff1f1b2d)),
+                                ),
+                              ),
+                              Text(
+                                "${driver['distanceKm'] ?? '--'} km",
+                                style: const TextStyle(
+                                  color: Color(0xff6053f8),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),

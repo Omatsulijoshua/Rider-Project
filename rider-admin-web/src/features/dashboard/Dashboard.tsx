@@ -16,6 +16,7 @@ import { formatCurrency, formatDateTime, formatNumber } from "@/lib/formatter";
 import type { AdminConsoleData } from "@/types/admin-console";
 import Login from "../auth/Login";
 import { fetchDashboardSummary } from "./dashboard.api";
+import type { AdminConsoleLiveDriver } from "@/types/admin-console";
 
 const sectionCopy: Record<RouteKey, { title: string; subtitle: string }> = {
   overview: {
@@ -70,6 +71,10 @@ function toneForStatus(value: string | boolean) {
 export default function Dashboard() {
   const [activeRoute, setActiveRoute] = useState<RouteKey>("overview");
   const [consoleData, setConsoleData] = useState<AdminConsoleData | null>(null);
+  const [driverVehicleFilter, setDriverVehicleFilter] = useState("all");
+  const [driverStatusFilter, setDriverStatusFilter] = useState("all");
+  const [driverMinRating, setDriverMinRating] = useState("0");
+  const [driverActiveDelivery, setDriverActiveDelivery] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -160,6 +165,20 @@ export default function Dashboard() {
       );
     }
 
+    const filteredLiveDrivers = consoleData.liveDrivers.filter((driver) => {
+      const vehicleMatches =
+        driverVehicleFilter === "all" || driver.vehicleType === driverVehicleFilter;
+      const statusMatches =
+        driverStatusFilter === "all" || driver.status === driverStatusFilter;
+      const ratingMatches = driver.rating >= Number(driverMinRating);
+      const activeDeliveryMatches =
+        driverActiveDelivery === "all" ||
+        (driverActiveDelivery === "active" && driver.activeDeliveryCount > 0) ||
+        (driverActiveDelivery === "idle" && driver.activeDeliveryCount === 0);
+
+      return vehicleMatches && statusMatches && ratingMatches && activeDeliveryMatches;
+    });
+
     if (!consoleData) {
       return (
         <section className="card">
@@ -198,28 +217,77 @@ export default function Dashboard() {
         );
       case "drivers":
         return (
-          <section className="card">
-            <div className="section-heading">
-              <h3>Drivers</h3>
-              <span>{consoleData.drivers.length} records</span>
-            </div>
-            <Table
-              columns={[
-                { key: "phone", header: "Phone", render: (row) => row.phone },
-                { key: "email", header: "Email", render: (row) => row.email ?? "No email" },
-                {
-                  key: "online",
-                  header: "Online",
-                  render: (row) => (
-                    <Badge tone={toneForStatus(row.isOnline)}>{row.isOnline ? "online" : "offline"}</Badge>
-                  ),
-                },
-                { key: "wallet", header: "Wallet", render: (row) => formatCurrency(row.walletBalance) },
-                { key: "orders", header: "Orders", render: (row) => formatNumber(row.totalOrders) },
-              ]}
-              rows={consoleData.drivers}
-            />
-          </section>
+          <div className="stack-list">
+            <section className="card">
+              <div className="section-heading">
+                <h3>Live driver map</h3>
+                <span>{filteredLiveDrivers.length} visible drivers</span>
+              </div>
+              <div className="filter-row">
+                <select value={driverVehicleFilter} onChange={(event) => setDriverVehicleFilter(event.target.value)}>
+                  <option value="all">All vehicles</option>
+                  <option value="bike">Bike</option>
+                  <option value="car">Car</option>
+                  <option value="bus">Bus</option>
+                  <option value="mini truck">Mini truck</option>
+                  <option value="big truck">Big truck</option>
+                </select>
+                <select value={driverStatusFilter} onChange={(event) => setDriverStatusFilter(event.target.value)}>
+                  <option value="all">All status</option>
+                  <option value="AVAILABLE">Available</option>
+                  <option value="BUSY">Busy</option>
+                  <option value="ON_DELIVERY">On delivery</option>
+                  <option value="OFFLINE">Offline</option>
+                </select>
+                <select value={driverMinRating} onChange={(event) => setDriverMinRating(event.target.value)}>
+                  <option value="0">Any rating</option>
+                  <option value="3">3+ rating</option>
+                  <option value="4">4+ rating</option>
+                  <option value="4.5">4.5+ rating</option>
+                </select>
+                <select value={driverActiveDelivery} onChange={(event) => setDriverActiveDelivery(event.target.value)}>
+                  <option value="all">All delivery state</option>
+                  <option value="active">Active delivery</option>
+                  <option value="idle">No active delivery</option>
+                </select>
+              </div>
+              <LiveDriverMap drivers={filteredLiveDrivers} />
+            </section>
+            <section className="card">
+              <div className="section-heading">
+                <h3>Drivers</h3>
+                <span>{consoleData.drivers.length} records</span>
+              </div>
+              <Table
+                columns={[
+                  { key: "phone", header: "Phone", render: (row) => row.phone },
+                  { key: "email", header: "Email", render: (row) => row.email ?? "No email" },
+                  {
+                    key: "online",
+                    header: "Online",
+                    render: (row) => (
+                      <Badge tone={toneForStatus(row.isOnline)}>{row.isOnline ? "online" : "offline"}</Badge>
+                    ),
+                  },
+                  {
+                    key: "driverStatus",
+                    header: "Driver status",
+                    render: (row) => <Badge tone={toneForStatus(row.driverStatus)}>{row.driverStatus}</Badge>,
+                  },
+                  { key: "vehicle", header: "Vehicle", render: (row) => row.vehicleType },
+                  { key: "rating", header: "Rating", render: (row) => row.rating.toFixed(1) },
+                  { key: "wallet", header: "Wallet", render: (row) => formatCurrency(row.walletBalance) },
+                  { key: "orders", header: "Orders", render: (row) => formatNumber(row.totalOrders) },
+                  {
+                    key: "fraud",
+                    header: "Fraud score",
+                    render: (row) => <Badge tone={row.fraudScore > 20 ? "danger" : "neutral"}>{row.fraudScore}</Badge>,
+                  },
+                ]}
+                rows={consoleData.drivers}
+              />
+            </section>
+          </div>
         );
       case "rides":
         return (
@@ -452,7 +520,17 @@ export default function Dashboard() {
           </>
         );
     }
-  }, [activeRoute, consoleData, error, loading, metricCards]);
+  }, [
+    activeRoute,
+    consoleData,
+    driverActiveDelivery,
+    driverMinRating,
+    driverStatusFilter,
+    driverVehicleFilter,
+    error,
+    loading,
+    metricCards,
+  ]);
 
   return (
     <AdminLayout
@@ -525,5 +603,52 @@ export default function Dashboard() {
         </aside>
       </section>
     </AdminLayout>
+  );
+}
+
+function LiveDriverMap({ drivers }: { drivers: AdminConsoleLiveDriver[] }) {
+  const visibleDrivers = drivers.slice(0, 18);
+
+  return (
+    <div className="live-map">
+      <div className="live-map__canvas">
+        {visibleDrivers.map((driver, index) => (
+          <button
+            className={`driver-pin ${driver.isOnline ? "is-online" : "is-offline"} ${
+              driver.offlineDuringDelivery ? "has-alert" : ""
+            }`}
+            key={driver.id}
+            style={{
+              left: `${12 + ((index * 23) % 76)}%`,
+              top: `${18 + ((index * 17) % 62)}%`,
+            }}
+            title={`${driver.name} - ${driver.status}`}
+          >
+            {driver.vehicleType.slice(0, 1).toUpperCase()}
+          </button>
+        ))}
+      </div>
+      <div className="live-map__list">
+        {visibleDrivers.map((driver) => (
+          <div className="list-row" key={driver.id}>
+            <div>
+              <strong>{driver.name}</strong>
+              <p className="muted-copy">
+                {driver.vehicleType} / {driver.rating.toFixed(1)} rating / {driver.completedJobs} jobs
+              </p>
+              <p className="muted-copy">
+                Last active {driver.lastActiveAt ? formatDateTime(driver.lastActiveAt) : "not recorded"}
+              </p>
+            </div>
+            <div className="driver-badges">
+              <Badge tone={toneForStatus(driver.status)}>{driver.status}</Badge>
+              {driver.activeDeliveryCount > 0 ? <Badge tone="info">{driver.activeDeliveryCount} active</Badge> : null}
+              {driver.offlineDuringDelivery ? <Badge tone="danger">flagged</Badge> : null}
+            </div>
+          </div>
+        ))}
+        {visibleDrivers.length === 0 ? <p className="muted-copy">No drivers match the selected filters.</p> : null}
+      </div>
+    </div>
   );
 }

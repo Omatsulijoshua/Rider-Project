@@ -4,3 +4,14 @@ run-logs/
 .idea/
 .vscode/
 node_modules/
+build/
+.gradle/
+.cxx/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/key.properties
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_options.dart
+*.jks

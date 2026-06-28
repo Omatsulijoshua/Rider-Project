@@ -42,7 +42,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -50,7 +51,8 @@ button {
   border: 0;
 }
 
-input {
+input,
+select {
   width: 100%;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
@@ -268,6 +270,95 @@ input {
   gap: 0.8rem;
 }
 
+.filter-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.live-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 1rem;
+}
+
+.live-map__canvas {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  background:
+    linear-gradient(90deg, rgba(15, 118, 110, 0.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(15, 118, 110, 0.08) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(255, 250, 242, 0.92), rgba(233, 247, 243, 0.92));
+  background-size: 44px 44px, 44px 44px, 100% 100%;
+}
+
+.live-map__canvas::before,
+.live-map__canvas::after {
+  content: "";
+  position: absolute;
+  background: rgba(36, 23, 15, 0.1);
+}
+
+.live-map__canvas::before {
+  left: 12%;
+  right: 8%;
+  top: 48%;
+  height: 12px;
+  transform: rotate(-8deg);
+}
+
+.live-map__canvas::after {
+  left: 42%;
+  top: -12%;
+  width: 12px;
+  height: 120%;
+  transform: rotate(18deg);
+}
+
+.live-map__list {
+  display: grid;
+  max-height: 360px;
+  gap: 0.8rem;
+  overflow: auto;
+}
+
+.driver-pin {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 999px;
+  color: white;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(36, 23, 15, 0.2);
+}
+
+.driver-pin.is-online {
+  background: var(--success);
+}
+
+.driver-pin.is-offline {
+  background: var(--text-soft);
+}
+
+.driver-pin.has-alert {
+  background: var(--danger);
+  outline: 4px solid rgba(194, 65, 12, 0.18);
+}
+
+.driver-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
 .list-row {
   border-radius: var(--radius-md);
   padding: 0.9rem 1rem;
@@ -403,7 +494,8 @@ input {
 @media (max-width: 1180px) {
   .overview-grid,
   .analytics-grid,
-  .feature-grid {
+  .feature-grid,
+  .live-map {
     grid-template-columns: 1fr;
   }
 
@@ -443,6 +535,10 @@ input {
   }
 
   .hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-row {
     grid-template-columns: 1fr;
   }
 }

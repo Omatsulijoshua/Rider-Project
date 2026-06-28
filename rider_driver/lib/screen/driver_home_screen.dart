@@ -19,7 +19,9 @@ class DriverHomeScreen extends StatefulWidget {
 class _DriverHomeScreenState extends State<DriverHomeScreen> {
   final Completer<GoogleMapController> _mapController = Completer();
   bool _isOnline = false;
+  String _driverStatus = 'OFFLINE';
   Timer? _locationTimer;
+  bool _locationWarningSent = false;
 
   @override
   void dispose() {
@@ -29,24 +31,50 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
   void _startLocationUpdates() {
     _locationTimer?.cancel();
-    _locationTimer = Timer.periodic(const Duration(seconds: 30), (timer) async {
+    context.read<CurrentLocationProvider>().startLiveLocation();
+    _sendLocationUpdate();
+
+    _locationTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {
       if (!_isOnline) {
         timer.cancel();
         return;
       }
-      
-      final locationProvider = context.read<CurrentLocationProvider>();
-      if (locationProvider.currentLatLng != null) {
-        try {
-          await ApiClient().patch('/drivers/location', body: {
-            'lat': locationProvider.currentLatLng!.latitude,
-            'lng': locationProvider.currentLatLng!.longitude,
-          });
-        } catch (e) {
-          print("Error updating periodic location: $e");
-        }
-      }
+      await _sendLocationUpdate();
     });
+  }
+
+  Future<void> _sendLocationUpdate() async {
+    final locationProvider = context.read<CurrentLocationProvider>();
+
+    if (locationProvider.hasError) {
+      await _reportLocationDisabled();
+      return;
+    }
+
+    try {
+      final current = locationProvider.currentLatLng;
+      final response = await ApiClient().patch('/drivers/location', body: {
+        'lat': current.latitude,
+        'lng': current.longitude,
+      });
+
+      if (response is Map && response['status'] != null && mounted) {
+        setState(() => _driverStatus = response['status']);
+      }
+    } catch (e) {
+      print("Error updating live location: $e");
+    }
+  }
+
+  Future<void> _reportLocationDisabled() async {
+    if (_locationWarningSent) return;
+    _locationWarningSent = true;
+
+    try {
+      await ApiClient().post('/drivers/location-disabled', body: {});
+    } catch (e) {
+      print("Error reporting disabled location: $e");
+    }
   }
 
   @override
@@ -146,7 +174,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    _isOnline ? 'Receiving orders' : 'Not active',
+                    _isOnline ? _driverStatus : 'OFFLINE',
                     style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ],
@@ -157,15 +185,23 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             value: _isOnline,
             activeTrackColor: AppColors.primary,
             onChanged: (value) async {
-              setState(() => _isOnline = value);
+              setState(() {
+                _isOnline = value;
+                _driverStatus = value ? 'AVAILABLE' : 'OFFLINE';
+              });
               try {
-                await ApiClient().post('/drivers/status', body: {'isOnline': value});
+                final response = await ApiClient().post('/drivers/status', body: {'isOnline': value});
+                if (response is Map && response['status'] != null && mounted) {
+                  setState(() => _driverStatus = response['status']);
+                }
                 if (value) {
                   SocketService().init(context);
                   _startLocationUpdates();
+                  _locationWarningSent = false;
                 } else {
                   SocketService().disconnect();
                   _locationTimer?.cancel();
+                  context.read<CurrentLocationProvider>().cancelLocationRequest();
                 }
               } catch (e) {
                 print("Error syncing status: $e");
