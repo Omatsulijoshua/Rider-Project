@@ -11,6 +11,7 @@ import 'package:rider/service/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class PostPage extends StatefulWidget {
   const PostPage({super.key});
@@ -33,6 +34,9 @@ class _PostPageState extends State<PostPage> {
   TextEditingController instructions = TextEditingController();
   String? email, id;
   final List<String> _capturedImages = [];
+  final List<dynamic> _nearbyDrivers = [];
+  IO.Socket? _nearbySocket;
+  bool _isLoadingNearbyDrivers = false;
 
   double? pickupLat, pickupLng, dropLat, dropLng;
   double totalAmount = 0.0;
@@ -53,6 +57,23 @@ class _PostPageState extends State<PostPage> {
   void initState() {
     super.initState();
     ontheload();
+  }
+
+  @override
+  void dispose() {
+    _nearbySocket?.disconnect();
+    pickupaddress.dispose();
+    pickupusername.dispose();
+    pickupphone.dispose();
+    pickupcompany.dispose();
+    dropoffaddress.dispose();
+    dropoffusername.dispose();
+    dropoffphone.dispose();
+    dropoffcompany.dispose();
+    itemType.dispose();
+    weight.dispose();
+    instructions.dispose();
+    super.dispose();
   }
 
   Future<void> _selectLocation(bool isPickup) async {
@@ -105,6 +126,10 @@ class _PostPageState extends State<PostPage> {
           }
         });
       }
+
+      if (isPickup) {
+        await _refreshNearbyDrivers();
+      }
     }
   }
 
@@ -132,10 +157,80 @@ class _PostPageState extends State<PostPage> {
           }
           _calculatePrice();
         });
+        if (isPickup) {
+          await _refreshNearbyDrivers();
+        }
       }
     } catch (e) {
       // Could not geocode address
     }
+  }
+
+  Future<void> _refreshNearbyDrivers() async {
+    if (pickupLat == null || pickupLng == null) return;
+
+    setState(() => _isLoadingNearbyDrivers = true);
+    try {
+      final response = await ApiClient().get(
+        '/drivers/nearby?lat=$pickupLat&lng=$pickupLng&radiusKm=12',
+        requireAuth: false,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _nearbyDrivers
+          ..clear()
+          ..addAll(response is List ? response : []);
+      });
+      _watchNearbyDrivers();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _nearbyDrivers.clear());
+    } finally {
+      if (mounted) setState(() => _isLoadingNearbyDrivers = false);
+    }
+  }
+
+  void _watchNearbyDrivers() {
+    if (pickupLat == null || pickupLng == null) return;
+
+    final String baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
+    _nearbySocket ??= IO.io(baseUrl, <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+
+    void joinNearbyRoom() {
+      _nearbySocket!.emit('watchNearbyDrivers', {
+        'lat': pickupLat,
+        'lng': pickupLng,
+        'radiusKm': 12,
+      });
+    }
+
+    if (_nearbySocket!.connected) {
+      joinNearbyRoom();
+      return;
+    }
+
+    _nearbySocket!.off('connect');
+    _nearbySocket!.off('nearbyDriverUpdate');
+    _nearbySocket!.off('nearbyDriverUnavailable');
+    _nearbySocket!.connect();
+    _nearbySocket!.onConnect((_) => joinNearbyRoom());
+    _nearbySocket!.on('nearbyDriverUpdate', (data) {
+      if (!mounted) return;
+      setState(() {
+        _nearbyDrivers.removeWhere((driver) => driver is Map && driver['id'] == data['id']);
+        _nearbyDrivers.insert(0, data);
+      });
+    });
+    _nearbySocket!.on('nearbyDriverUnavailable', (data) {
+      if (!mounted) return;
+      setState(() {
+        _nearbyDrivers.removeWhere((driver) => driver is Map && driver['id'] == data['id']);
+      });
+    });
   }
 
   Future<void> _selectSchedule() async {
@@ -361,9 +456,7 @@ class _PostPageState extends State<PostPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 GestureDetector(
-                                  onTap: () {
-                                    // Submit Location
-                                  },
+                                  onTap: _refreshNearbyDrivers,
                                   child: Container(
                                     height: 60,
                                     width: MediaQuery.of(context).size.width / 2.2,
@@ -399,6 +492,8 @@ class _PostPageState extends State<PostPage> {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 18.0),
+                      _buildNearbyDriversPanel(),
                       const SizedBox(height: 40.0),
                       // PICK-UP DETAILS (kept same)
                       Container(
@@ -898,6 +993,116 @@ class _PostPageState extends State<PostPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildNearbyDriversPanel() {
+    final bool hasPickup = pickupLat != null && pickupLng != null;
+
+    return Container(
+      margin: const EdgeInsets.only(right: 20.0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFf7f7ff),
+        border: Border.all(color: const Color(0xff6053f8).withOpacity(0.25), width: 1.5),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.radar, color: Color(0xff6053f8)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Nearby available drivers",
+                  style: AppWidget.normalTextFieldStyle(),
+                ),
+              ),
+              if (_isLoadingNearbyDrivers)
+                const SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                IconButton(
+                  onPressed: _refreshNearbyDrivers,
+                  icon: const Icon(Icons.refresh, color: Color(0xff6053f8)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (!hasPickup)
+            const Text(
+              "Select a pickup location to preview live nearby drivers before booking.",
+              style: TextStyle(color: Colors.black54),
+            )
+          else if (_nearbyDrivers.isEmpty && !_isLoadingNearbyDrivers)
+            const Text(
+              "No online available drivers found within 12 km right now.",
+              style: TextStyle(color: Colors.black54),
+            )
+          else
+            ..._nearbyDrivers.take(4).map((driver) {
+              final vehicleType = driver['vehicleType'] ?? 'vehicle';
+              final rating = driver['rating'] ?? 0;
+              final completedJobs = driver['completedJobs'] ?? 0;
+              final distanceKm = driver['distanceKm'] ?? '--';
+              final etaMinutes = driver['etaMinutes'] ?? '--';
+
+              return Container(
+                margin: const EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      backgroundColor: Color(0xff6053f8),
+                      child: Icon(Icons.delivery_dining, color: Colors.white),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "${vehicleType.toString().toUpperCase()} / AVAILABLE",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            "$rating rating / $completedJobs completed jobs",
+                            style: const TextStyle(color: Colors.black54, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          "$etaMinutes min",
+                          style: const TextStyle(
+                            color: Color(0xff6053f8),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "$distanceKm km",
+                          style: const TextStyle(color: Colors.black54, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
+        ],
       ),
     );
   }

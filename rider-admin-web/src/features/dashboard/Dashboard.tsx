@@ -75,6 +75,9 @@ export default function Dashboard() {
   const [driverStatusFilter, setDriverStatusFilter] = useState("all");
   const [driverMinRating, setDriverMinRating] = useState("0");
   const [driverActiveDelivery, setDriverActiveDelivery] = useState("all");
+  const [driverLocationLat, setDriverLocationLat] = useState("");
+  const [driverLocationLng, setDriverLocationLng] = useState("");
+  const [driverLocationRadius, setDriverLocationRadius] = useState("10");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -118,6 +121,15 @@ export default function Dashboard() {
       }
     }
   }, [isMounted, router]);
+
+  useEffect(() => {
+    if (!isMounted || !getToken()) return;
+    const timer = window.setInterval(() => {
+      void loadDashboard();
+    }, 10000);
+
+    return () => window.clearInterval(timer);
+  }, [isMounted]);
 
   const metricCards = useMemo(() => {
     if (!consoleData) return [];
@@ -165,20 +177,6 @@ export default function Dashboard() {
       );
     }
 
-    const filteredLiveDrivers = consoleData.liveDrivers.filter((driver) => {
-      const vehicleMatches =
-        driverVehicleFilter === "all" || driver.vehicleType === driverVehicleFilter;
-      const statusMatches =
-        driverStatusFilter === "all" || driver.status === driverStatusFilter;
-      const ratingMatches = driver.rating >= Number(driverMinRating);
-      const activeDeliveryMatches =
-        driverActiveDelivery === "all" ||
-        (driverActiveDelivery === "active" && driver.activeDeliveryCount > 0) ||
-        (driverActiveDelivery === "idle" && driver.activeDeliveryCount === 0);
-
-      return vehicleMatches && statusMatches && ratingMatches && activeDeliveryMatches;
-    });
-
     if (!consoleData) {
       return (
         <section className="card">
@@ -190,6 +188,29 @@ export default function Dashboard() {
         </section>
       );
     }
+
+    const hasLocationFilter = driverLocationLat.trim() !== "" && driverLocationLng.trim() !== "";
+    const filterLat = Number(driverLocationLat);
+    const filterLng = Number(driverLocationLng);
+    const filterRadius = Number(driverLocationRadius || 10);
+    const filteredLiveDrivers = consoleData.liveDrivers.filter((driver) => {
+      const vehicleMatches =
+        driverVehicleFilter === "all" || driver.vehicleType === driverVehicleFilter;
+      const statusMatches =
+        driverStatusFilter === "all" || driver.status === driverStatusFilter;
+      const ratingMatches = driver.rating >= Number(driverMinRating);
+      const activeDeliveryMatches =
+        driverActiveDelivery === "all" ||
+        (driverActiveDelivery === "active" && driver.activeDeliveryCount > 0) ||
+        (driverActiveDelivery === "idle" && driver.activeDeliveryCount === 0);
+      const locationMatches =
+        !hasLocationFilter ||
+        (driver.lat !== null &&
+          driver.lng !== null &&
+          calculateDistanceKm(filterLat, filterLng, driver.lat, driver.lng) <= filterRadius);
+
+      return vehicleMatches && statusMatches && ratingMatches && activeDeliveryMatches && locationMatches;
+    });
 
     switch (activeRoute) {
       case "customers":
@@ -250,6 +271,21 @@ export default function Dashboard() {
                   <option value="active">Active delivery</option>
                   <option value="idle">No active delivery</option>
                 </select>
+                <input
+                  value={driverLocationLat}
+                  onChange={(event) => setDriverLocationLat(event.target.value)}
+                  placeholder="Latitude"
+                />
+                <input
+                  value={driverLocationLng}
+                  onChange={(event) => setDriverLocationLng(event.target.value)}
+                  placeholder="Longitude"
+                />
+                <input
+                  value={driverLocationRadius}
+                  onChange={(event) => setDriverLocationRadius(event.target.value)}
+                  placeholder="Radius km"
+                />
               </div>
               <LiveDriverMap drivers={filteredLiveDrivers} />
             </section>
@@ -524,6 +560,9 @@ export default function Dashboard() {
     activeRoute,
     consoleData,
     driverActiveDelivery,
+    driverLocationLat,
+    driverLocationLng,
+    driverLocationRadius,
     driverMinRating,
     driverStatusFilter,
     driverVehicleFilter,
@@ -608,23 +647,24 @@ export default function Dashboard() {
 
 function LiveDriverMap({ drivers }: { drivers: AdminConsoleLiveDriver[] }) {
   const visibleDrivers = drivers.slice(0, 18);
+  const positionedDrivers = positionDriversOnMap(visibleDrivers);
 
   return (
     <div className="live-map">
       <div className="live-map__canvas">
-        {visibleDrivers.map((driver, index) => (
+        {positionedDrivers.map((item) => (
           <button
-            className={`driver-pin ${driver.isOnline ? "is-online" : "is-offline"} ${
-              driver.offlineDuringDelivery ? "has-alert" : ""
+            className={`driver-pin ${item.driver.isOnline ? "is-online" : "is-offline"} ${
+              item.driver.offlineDuringDelivery ? "has-alert" : ""
             }`}
-            key={driver.id}
+            key={item.driver.id}
             style={{
-              left: `${12 + ((index * 23) % 76)}%`,
-              top: `${18 + ((index * 17) % 62)}%`,
+              left: `${item.left}%`,
+              top: `${item.top}%`,
             }}
-            title={`${driver.name} - ${driver.status}`}
+            title={`${item.driver.name} - ${item.driver.status}`}
           >
-            {driver.vehicleType.slice(0, 1).toUpperCase()}
+            {item.driver.vehicleType.slice(0, 1).toUpperCase()}
           </button>
         ))}
       </div>
@@ -651,4 +691,45 @@ function LiveDriverMap({ drivers }: { drivers: AdminConsoleLiveDriver[] }) {
       </div>
     </div>
   );
+}
+
+function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const earthRadiusKm = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function positionDriversOnMap(drivers: AdminConsoleLiveDriver[]) {
+  const validDrivers = drivers.filter((driver) => driver.lat !== null && driver.lng !== null);
+  const lats = validDrivers.map((driver) => driver.lat as number);
+  const lngs = validDrivers.map((driver) => driver.lng as number);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+  const latRange = Math.max(0.0001, maxLat - minLat);
+  const lngRange = Math.max(0.0001, maxLng - minLng);
+
+  return drivers.map((driver, index) => {
+    if (driver.lat === null || driver.lng === null || validDrivers.length === 0) {
+      return {
+        driver,
+        left: 12 + ((index * 23) % 76),
+        top: 18 + ((index * 17) % 62),
+      };
+    }
+
+    return {
+      driver,
+      left: 8 + ((driver.lng - minLng) / lngRange) * 84,
+      top: 8 + ((maxLat - driver.lat) / latRange) * 84,
+    };
+  });
 }

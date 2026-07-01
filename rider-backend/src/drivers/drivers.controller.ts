@@ -5,12 +5,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Role, Roles } from '../auth/roles.decorator';
 import { OrdersGateway } from '../orders/orders.gateway';
+import { OrdersService } from '../orders/orders.service';
 
 @Controller('drivers')
 export class DriversController {
   constructor(
     private readonly driversService: DriversService,
     private readonly ordersGateway: OrdersGateway,
+    private readonly ordersService: OrdersService,
   ) {}
 
   @UseGuards(AuthGuard('jwt'))
@@ -32,8 +34,14 @@ export class DriversController {
 
     this.ordersGateway.emitDriverAvailability(result);
     
-    if (dto.orderId) {
-      this.ordersGateway.emitDriverLocation(dto.orderId, dto.lat, dto.lng, result);
+    if (dto.orderId && result.isOnline) {
+      const tracking = await this.ordersService.buildDriverTrackingPayload(
+        dto.orderId,
+        dto.lat,
+        dto.lng,
+        result,
+      );
+      this.ordersGateway.emitDriverLocation(dto.orderId, dto.lat, dto.lng, result, tracking);
     }
     
     return result;
@@ -82,6 +90,9 @@ export class DriversController {
     @Query('status') status?: DriverStatus,
     @Query('minRating') minRating?: string,
     @Query('activeDelivery') activeDelivery?: string,
+    @Query('lat') lat?: string,
+    @Query('lng') lng?: string,
+    @Query('radiusKm') radiusKm?: string,
   ) {
     return this.driversService.getAdminDriverMap({
       vehicleType,
@@ -89,6 +100,9 @@ export class DriversController {
       minRating: minRating ? Number(minRating) : undefined,
       activeDelivery:
         activeDelivery === undefined ? undefined : activeDelivery === 'true',
+      lat: lat ? Number(lat) : undefined,
+      lng: lng ? Number(lng) : undefined,
+      radiusKm: radiusKm ? Number(radiusKm) : undefined,
     });
   }
 }

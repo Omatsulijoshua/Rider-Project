@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:rider/service/api_client.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-// Assuming backendUrl is here
 
 class TrackDeliveryPage extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -13,9 +14,11 @@ class TrackDeliveryPage extends StatefulWidget {
 class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
   late IO.Socket socket;
   late String _status;
+  GoogleMapController? _mapController;
   Map<String, double>? _driverLocation;
   Map<String, dynamic>? _driverProfile;
   int? _etaMinutes;
+  String? _trackingPhase;
   String? _podUrl;
 
   @override
@@ -26,9 +29,7 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
   }
 
   void _initSocket() {
-    // In a real app, use the actual backend URL from constants
-    // For now, using a placeholder if backendUrl is not defined
-    const String url = "http://localhost:3000"; // Update this to your server IP
+    final String url = ApiClient.baseUrl.replaceAll('/api', '');
 
     socket = IO.io(url, <String, dynamic>{
       'transports': ['websocket'],
@@ -60,14 +61,16 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
       if (mounted) {
         setState(() {
           _driverLocation = {
-            'lat': data['lat'],
-            'lng': data['lng'],
+            'lat': (data['lat'] as num).toDouble(),
+            'lng': (data['lng'] as num).toDouble(),
           };
           if (data['driver'] != null) {
             _driverProfile = Map<String, dynamic>.from(data['driver']);
           }
-          _etaMinutes = data['etaMinutes'];
+          _etaMinutes = data['etaMinutes'] is num ? (data['etaMinutes'] as num).round() : null;
+          _trackingPhase = data['phase']?.toString();
         });
+        _moveMapToDriver();
       }
     });
 
@@ -77,7 +80,20 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
   @override
   void dispose() {
     socket.dispose();
+    _mapController?.dispose();
     super.dispose();
+  }
+
+  void _moveMapToDriver() {
+    final location = _driverLocation;
+    final controller = _mapController;
+    if (location == null || controller == null) return;
+
+    controller.animateCamera(
+      CameraUpdate.newLatLng(
+        LatLng(location['lat']!, location['lng']!),
+      ),
+    );
   }
 
   @override
@@ -294,7 +310,7 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  "http://localhost:3000/api/files/$_podUrl", // Adjust to your API base
+                  "${ApiClient.baseUrl}/files/$_podUrl",
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -312,6 +328,12 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
   }
 
   Widget _buildDriverLocationCard() {
+    final driverPosition = LatLng(
+      _driverLocation!['lat']!,
+      _driverLocation!['lng']!,
+    );
+    final phaseLabel = (_trackingPhase ?? 'LIVE_TRACKING').replaceAll('_', ' ');
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -327,16 +349,58 @@ class _TrackDeliveryPageState extends State<TrackDeliveryPage> {
                     style: TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
-            const SizedBox(height: 10),
-            Text(
-                "Lat: ${_driverLocation!['lat']!.toStringAsFixed(4)}, Lng: ${_driverLocation!['lng']!.toStringAsFixed(4)}"),
-            const SizedBox(height: 10),
-            const Text(
-              "(In a production app, this would be a Google Map view)",
-              style: TextStyle(
-                  fontSize: 10,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey),
+            const SizedBox(height: 14),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                height: 260,
+                width: double.infinity,
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: driverPosition,
+                    zoom: 15,
+                  ),
+                  markers: {
+                    Marker(
+                      markerId: const MarkerId('assigned-driver'),
+                      position: driverPosition,
+                      infoWindow: InfoWindow(
+                        title: 'Assigned driver',
+                        snippet: _etaMinutes == null ? phaseLabel : '$phaseLabel / ETA $_etaMinutes min',
+                      ),
+                    ),
+                  },
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    _moveMapToDriver();
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Chip(
+                  avatar: const Icon(Icons.navigation, size: 16),
+                  label: Text(phaseLabel),
+                ),
+                const SizedBox(width: 8),
+                if (_etaMinutes != null)
+                  Chip(
+                    avatar: const Icon(Icons.schedule, size: 16),
+                    label: Text("ETA $_etaMinutes min"),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Lat: ${_driverLocation!['lat']!.toStringAsFixed(4)}, Lng: ${_driverLocation!['lng']!.toStringAsFixed(4)}",
+                style: const TextStyle(color: Colors.grey),
+              ),
             ),
           ],
         ),

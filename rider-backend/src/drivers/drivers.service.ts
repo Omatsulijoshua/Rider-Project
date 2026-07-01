@@ -10,12 +10,20 @@ export class DriversService {
     const driver = await this.prisma.driver.findUnique({ where: { userId } });
     if (!driver) throw new NotFoundException('Driver not found');
     if (!driver.isOnline) return driver;
+    const activeDelivery = await this.hasActiveDelivery(driver.id);
+    const status =
+      driver.status === DriverStatus.OFFLINE
+        ? activeDelivery
+          ? DriverStatus.ON_DELIVERY
+          : DriverStatus.AVAILABLE
+        : driver.status;
 
     return this.prisma.driver.update({
       where: { userId },
       data: {
         latitude: lat,
         longitude: lng,
+        status,
         lastActiveAt: new Date(),
         locationDisabledAt: null,
       },
@@ -100,7 +108,7 @@ export class DriversService {
         longitude: { not: null },
         ...(vehicleType ? { vehicleType } : {}),
       },
-      include: { user: { select: { id: true, name: true, phone: true } } },
+      include: { user: { select: { id: true, name: true } } },
     });
 
     return drivers
@@ -108,7 +116,6 @@ export class DriversService {
         id: driver.id,
         userId: driver.userId,
         name: driver.user.name,
-        phone: driver.user.phone,
         status: driver.status,
         isOnline: driver.isOnline,
         vehicleType: driver.vehicleType ?? 'bike',
@@ -120,6 +127,12 @@ export class DriversService {
         distanceKm: this.roundDistance(
           this.calculateDistance(lat, lng, driver.latitude ?? 0, driver.longitude ?? 0),
         ),
+        etaMinutes: Math.max(
+          3,
+          Math.ceil(
+            (this.calculateDistance(lat, lng, driver.latitude ?? 0, driver.longitude ?? 0) / 24) * 60,
+          ),
+        ),
       }))
       .filter((driver) => driver.distanceKm <= radiusKm)
       .sort((a, b) => a.distanceKm - b.distanceKm);
@@ -130,6 +143,9 @@ export class DriversService {
     status?: DriverStatus;
     minRating?: number;
     activeDelivery?: boolean;
+    lat?: number;
+    lng?: number;
+    radiusKm?: number;
   }) {
     const drivers = await this.prisma.driver.findMany({
       where: {
@@ -167,21 +183,41 @@ export class DriversService {
             : driver.orders.length === 0,
       )
       .map((driver) => ({
-        id: driver.id,
-        userId: driver.userId,
-        name: driver.user.name,
-        phone: driver.user.phone,
-        email: driver.user.email,
-        isOnline: driver.isOnline,
-        status: driver.status,
-        vehicleType: driver.vehicleType ?? 'bike',
-        rating: driver.averageRating,
-        completedJobs: driver.totalRatings,
-        fraudScore: driver.fraudScore,
-        lat: driver.latitude,
-        lng: driver.longitude,
-        lastActiveAt: driver.lastActiveAt,
-        activeDeliveries: driver.orders,
+        driver,
+        distanceKm:
+          filters.lat !== undefined && filters.lng !== undefined
+            ? this.roundDistance(
+                this.calculateDistance(
+                  filters.lat,
+                  filters.lng,
+                  driver.latitude ?? 0,
+                  driver.longitude ?? 0,
+                ),
+              )
+            : undefined,
+      }))
+      .filter(({ distanceKm }) =>
+        filters.radiusKm === undefined || distanceKm === undefined
+          ? true
+          : distanceKm <= filters.radiusKm,
+      )
+      .map((driver) => ({
+        id: driver.driver.id,
+        userId: driver.driver.userId,
+        name: driver.driver.user.name,
+        phone: driver.driver.user.phone,
+        email: driver.driver.user.email,
+        isOnline: driver.driver.isOnline,
+        status: driver.driver.status,
+        vehicleType: driver.driver.vehicleType ?? 'bike',
+        rating: driver.driver.averageRating,
+        completedJobs: driver.driver.totalRatings,
+        fraudScore: driver.driver.fraudScore,
+        lat: driver.driver.latitude,
+        lng: driver.driver.longitude,
+        lastActiveAt: driver.driver.lastActiveAt,
+        activeDeliveries: driver.driver.orders,
+        distanceKm: driver.distanceKm,
       }));
   }
 

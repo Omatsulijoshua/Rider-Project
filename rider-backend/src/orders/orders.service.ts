@@ -124,13 +124,15 @@ export class OrdersService {
       return;
     }
 
-    const [totalDrivers, availableDrivers] = await Promise.all([
+    const [totalDrivers, driverCandidates] = await Promise.all([
       this.prisma.driver.count(),
       this.prisma.driver.findMany({
         where: {
           isOnline: true,
-          status: DriverStatus.AVAILABLE,
+          status: { in: [DriverStatus.AVAILABLE, DriverStatus.BUSY, DriverStatus.ON_DELIVERY] },
           userId: { notIn: order.rejectedBy },
+          latitude: { not: null },
+          longitude: { not: null },
         },
         include: {
           user: { select: { id: true, name: true, phone: true } },
@@ -139,8 +141,17 @@ export class OrdersService {
     ]);
 
     this.ordersGateway.broadcastDebug(
-      `DB Stats: ${totalDrivers} total drivers, ${availableDrivers.length} online and available`,
+      `DB Stats: ${totalDrivers} total drivers, ${driverCandidates.length} online candidates`,
     );
+
+    const availableDrivers = (
+      await Promise.all(
+        driverCandidates.map(async (driver) => {
+          if (driver.status === DriverStatus.AVAILABLE) return driver;
+          return (await this.canAcceptRouteMatchedJob(driver.id, order)) ? driver : null;
+        }),
+      )
+    ).filter((driver): driver is (typeof driverCandidates)[number] => Boolean(driver));
 
     if (availableDrivers.length === 0) {
       console.log(`No drivers found online and available for order ${orderId}`);
@@ -260,11 +271,20 @@ export class OrdersService {
 
     await this.prisma.driver.update({
       where: { id: driver.id },
-      data: { status: DriverStatus.BUSY, lastActiveAt: new Date() },
+      data: {
+        status: (await this.countActiveDriverOrders(driver.id)) > 1 ? DriverStatus.ON_DELIVERY : DriverStatus.BUSY,
+        lastActiveAt: new Date(),
+      },
     });
 
     this.ordersGateway.emitOrderUpdate(orderId, OrderStatus.ACCEPTED, {
       driver: updatedOrder.driver,
+      etaMinutes: this.calculateEtaMinutes(
+        updatedOrder.driver?.latitude ?? updatedOrder.pickupLat,
+        updatedOrder.driver?.longitude ?? updatedOrder.pickupLng,
+        updatedOrder.pickupLat,
+        updatedOrder.pickupLng,
+      ),
     });
 
     return updatedOrder;
@@ -319,9 +339,16 @@ export class OrdersService {
       });
 
       const activeJobs = await this.countActiveDriverOrders(updatedOrder.driverId);
+      const isDriverOnline = updatedOrder.driver?.isOnline ?? false;
       await this.prisma.driver.update({
         where: { id: updatedOrder.driverId },
-        data: { status: activeJobs > 0 ? DriverStatus.ON_DELIVERY : DriverStatus.AVAILABLE },
+        data: {
+          status: !isDriverOnline
+            ? DriverStatus.OFFLINE
+            : activeJobs > 0
+              ? DriverStatus.ON_DELIVERY
+              : DriverStatus.AVAILABLE,
+        },
       });
     }
 
@@ -363,14 +390,47 @@ export class OrdersService {
 
       await this.prisma.driver.update({
         where: { id: order.driverId },
-        data: { status: activeJobs > 0 ? DriverStatus.ON_DELIVERY : DriverStatus.AVAILABLE },
+        data: {
+          status: !driver?.isOnline
+            ? DriverStatus.OFFLINE
+            : activeJobs > 0
+              ? DriverStatus.ON_DELIVERY
+              : DriverStatus.AVAILABLE,
+        },
       });
 
       if (driver?.userId === userId && order.status !== OrderStatus.REQUESTED) {
+        const recentDriverCancels = await this.prisma.order.count({
+          where: {
+            driverId: order.driverId,
+            status: OrderStatus.CANCELLED,
+            cancelledById: userId,
+            cancelledAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+          },
+        });
+        const samePairCancels = await this.prisma.order.count({
+          where: {
+            driverId: order.driverId,
+            customerId: order.customerId,
+            status: OrderStatus.CANCELLED,
+            cancelledAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+          },
+        });
+        const recentlyOnline =
+          driver.lastActiveAt &&
+          Date.now() - driver.lastActiveAt.getTime() <= 30 * 60 * 1000;
+        const suspectedContactHarvesting =
+          recentlyOnline && (recentDriverCancels >= 2 || samePairCancels >= 1);
+
         await this.createDriverFraudSignal(
           userId,
-          'Driver accepted customer contact then cancelled the delivery',
-          15,
+          suspectedContactHarvesting
+            ? 'Driver repeatedly went online, collected customer contact, then cancelled'
+            : 'Driver accepted customer contact then cancelled the delivery',
+          15 +
+            recentDriverCancels * 5 +
+            samePairCancels * 10 +
+            (suspectedContactHarvesting ? 20 : 0),
         );
       }
     }
@@ -420,12 +480,52 @@ export class OrdersService {
       where: { trackingId },
       include: {
         customer: { select: { id: true, name: true, phone: true } },
-        driver: { select: { id: true, latitude: true, longitude: true, user: { select: { id: true, name: true, phone: true } } } },
+        driver: {
+          select: {
+            id: true,
+            latitude: true,
+            longitude: true,
+            isOnline: true,
+            status: true,
+            vehicleType: true,
+            averageRating: true,
+            totalRatings: true,
+            lastActiveAt: true,
+            user: { select: { id: true, name: true, phone: true } },
+          },
+        },
       },
     });
 
     if (!order) throw new NotFoundException('Order not found');
     return order;
+  }
+
+  async buildDriverTrackingPayload(orderId: string, lat: number, lng: number, driver: any) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) return { etaMinutes: 8, phase: 'TRACKING' };
+
+    const target =
+      order.status === OrderStatus.ACCEPTED || order.status === OrderStatus.PICKING_UP
+        ? { lat: order.pickupLat, lng: order.pickupLng, phase: 'TO_PICKUP' }
+        : { lat: order.dropLat, lng: order.dropLng, phase: 'TO_DROPOFF' };
+    const distanceKm = this.calculateDistance(lat, lng, target.lat, target.lng);
+
+    return {
+      etaMinutes: this.calculateEtaMinutes(lat, lng, target.lat, target.lng),
+      phase: target.phase,
+      distanceKm: this.roundMoney(distanceKm),
+      driver: {
+        id: driver.id,
+        userId: driver.userId,
+        isOnline: driver.isOnline,
+        status: driver.status,
+        vehicleType: driver.vehicleType ?? 'bike',
+        rating: driver.averageRating,
+        completedJobs: driver.totalRatings,
+        lastActiveAt: driver.lastActiveAt,
+      },
+    };
   }
 
   async getDriverOrders(userId: string) {
@@ -504,6 +604,11 @@ export class OrdersService {
     return Math.round(value * 100) / 100;
   }
 
+  private calculateEtaMinutes(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const distanceKm = this.calculateDistance(lat1, lon1, lat2, lon2);
+    return Math.max(3, Math.ceil((distanceKm / 24) * 60));
+  }
+
   private async countActiveDriverOrders(driverId: string) {
     return this.prisma.order.count({
       where: {
@@ -520,19 +625,34 @@ export class OrdersService {
     });
   }
 
-  private async canAcceptRouteMatchedJob(driverId: string, order: { pickupLat: number; pickupLng: number; dropLat: number; dropLng: number }) {
-    const activeOrders = await this.prisma.order.findMany({
-      where: {
-        driverId,
-        status: {
-          in: [OrderStatus.ACCEPTED, OrderStatus.PICKING_UP, OrderStatus.EN_ROUTE],
+  private async canAcceptRouteMatchedJob(
+    driverId: string,
+    order: { pickupLat: number; pickupLng: number; dropLat: number; dropLng: number; weight?: number | null },
+  ) {
+    const [driver, activeOrders] = await Promise.all([
+      this.prisma.driver.findUnique({
+        where: { id: driverId },
+        select: { vehicleType: true },
+      }),
+      this.prisma.order.findMany({
+        where: {
+          driverId,
+          status: {
+            in: [OrderStatus.ACCEPTED, OrderStatus.PICKING_UP, OrderStatus.EN_ROUTE],
+          },
         },
-      },
-      select: { pickupLat: true, pickupLng: true, dropLat: true, dropLng: true },
-    });
+        select: { pickupLat: true, pickupLng: true, dropLat: true, dropLng: true, weight: true },
+      }),
+    ]);
 
     if (activeOrders.length === 0) return true;
     if (activeOrders.length >= 3) return false;
+
+    const activeWeight = activeOrders.reduce((total, activeOrder) => total + (activeOrder.weight ?? 0), 0);
+    const nextWeight = order.weight ?? 0;
+    if (activeWeight + nextWeight > this.vehicleCapacityKg(driver?.vehicleType)) {
+      return false;
+    }
 
     return activeOrders.some((activeOrder) => {
       const pickupDistance = this.calculateDistance(
@@ -550,6 +670,15 @@ export class OrdersService {
 
       return pickupDistance <= 8 && dropoffDistance <= 12;
     });
+  }
+
+  private vehicleCapacityKg(vehicleType?: string | null) {
+    const normalized = (vehicleType ?? '').toLowerCase();
+    if (normalized.includes('truck')) return 1000;
+    if (normalized.includes('van')) return 500;
+    if (normalized.includes('car')) return 120;
+    if (normalized.includes('bike') || normalized.includes('motorcycle')) return 30;
+    return 50;
   }
 
   private async createDriverFraudSignal(userId: string, reason: string, scoreIncrease: number) {
