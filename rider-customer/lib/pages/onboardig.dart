@@ -20,7 +20,7 @@ class _OnboardingState extends State<Onboarding> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("images/onboard.png"),
+            Image.asset("images/fast-delivery.png"),
             const SizedBox(height: 50.0),
             Text(
               'Welcome to Rider',

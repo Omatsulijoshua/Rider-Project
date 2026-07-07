@@ -95,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
               decoration: const BoxDecoration(
                 color: AppColors.primary,
                 image: DecorationImage(
-                  image: AssetImage("images/signin.png"),
+                  image: AssetImage("images/delivery-man.png"),
                   fit: BoxFit.cover,
                 ),
               ),

@@ -4,6 +4,9 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $logDir = Join-Path $root "run-logs"
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 
+if (-not $env:DATABASE_URL) {
+  $env:DATABASE_URL = "postgresql://postgres:postgres_password@localhost:5432/rider_db?schema=public"
+}
 function Start-RiderProcess {
   param(
     [Parameter(Mandatory = $true)][string]$Name,
