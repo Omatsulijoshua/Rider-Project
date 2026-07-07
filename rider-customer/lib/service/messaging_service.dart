@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:rider/service/shared_pref.dart';
+import 'package:rider/service/api_client.dart';
 
 class Message {
   final String id;
@@ -49,7 +50,7 @@ class Message {
 
 class MessagingService {
   late io.Socket _socket;
-  final String baseUrl = 'http://localhost:3000';
+  final String baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
 
   Function(Message)? onMessageReceived;
   Function(List<Message>)? onMessagesLoaded;

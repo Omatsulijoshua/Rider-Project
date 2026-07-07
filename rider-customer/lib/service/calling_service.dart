@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:rider/service/shared_pref.dart';
+import 'package:rider/service/api_client.dart';
 
 enum CallState {
   idle,
@@ -36,7 +37,7 @@ class CallingService {
   RTCVideoRenderer? _localRenderer;
   RTCVideoRenderer? _remoteRenderer;
 
-  final String baseUrl = 'http://localhost:3000';
+  final String baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
   CallInfo? _currentCall;
 
   Function(CallInfo)? onIncomingCall;
