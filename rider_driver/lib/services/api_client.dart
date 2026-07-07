@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:rider_driver/services/shared_pref.dart';
 
 class ApiClient {
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'https://rider-project.onrender.com/api';
   static const Duration timeout = Duration(seconds: 30);
 
   static final ApiClient _instance = ApiClient._internal();

@@ -3,8 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:rider/service/shared_pref.dart';
 
 class ApiClient {
-  // ✅ USE YOUR CURRENT PC IP (CHANGE when network changes)
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'https://rider-project.onrender.com/api';
 
   static const Duration timeout = Duration(seconds: 30);
 
