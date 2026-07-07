@@ -86,12 +86,12 @@ export class AdminConsoleService {
           const activeDeliveries = orders.filter(
             (order) =>
               order.driverId === driver.id &&
-              [
+              ([
                 OrderStatus.ACCEPTED,
                 OrderStatus.PICKING_UP,
                 OrderStatus.EN_ROUTE,
                 OrderStatus.DESTINATION_REACHED,
-              ].includes(order.status),
+              ] as OrderStatus[]).includes(order.status),
           );
 
           return {
