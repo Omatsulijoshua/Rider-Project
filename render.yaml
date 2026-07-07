@@ -38,6 +38,4 @@ services:
 # -----------------------------------------------
 databases:
   - name: rider-db
-    databaseName: rider_db
-    user: postgres
     plan: free # Uses Render's free PostgreSQL tier
