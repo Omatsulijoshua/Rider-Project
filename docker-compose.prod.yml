@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # -----------------------------------------------
+  # Database Service (PostgreSQL)
+  # -----------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: rider-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_password}
+      POSTGRES_DB: ${DB_NAME:-rider_db}
+    ports:
+      - "5432:5432" # Expose for remote connections/Prisma Studio (secure this in production!)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-rider_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # -----------------------------------------------
+  # Backend API Service (NestJS)
+  # -----------------------------------------------
+  backend:
+    build:
+      context: ./rider-backend
+      dockerfile: Dockerfile
+    container_name: rider-backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres_password}@db:5432/${DB_NAME:-rider_db}?schema=public
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-your_super_secret_jwt_key_here}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      PAYSTACK_SECRET: ${PAYSTACK_SECRET}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+      R2_ENDPOINT: ${R2_ENDPOINT}
+      R2_ACCESS_KEY: ${R2_ACCESS_KEY}
+      R2_SECRET_KEY: ${R2_SECRET_KEY}
+      NODE_ENV: production
+    expose:
+      - "3000"
+
+  # -----------------------------------------------
+  # Admin Frontend Service (Next.js)
+  # -----------------------------------------------
+  admin:
+    build:
+      context: ./rider-admin-web
+      dockerfile: Dockerfile
+    container_name: rider-admin-web
+    restart: always
+    environment:
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
+      NODE_ENV: production
+    expose:
+      - "3001"
+
+  # -----------------------------------------------
+  # Reverse Proxy Service (Nginx)
+  # -----------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: rider-nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      # - "443:443" # Enable for SSL/HTTPS configuration
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # - ./nginx/certs:/etc/nginx/certs:ro # Enable for SSL certificates
+    depends_on:
+      - backend
+      - admin
+
+volumes:
+  postgres_data:
+    driver: local

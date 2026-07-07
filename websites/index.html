@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rider Logistics | Real-Time Package Pickup and Delivery</title>
+    <meta
+      name="description"
+      content="Rider Logistics is a real-time SaaS platform for package pickup, delivery tracking, driver availability, route-matched jobs, and admin safety oversight."
+    />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header" data-header>
+      <a class="brand" href="#top" aria-label="Rider Logistics home">
+        <span class="brand-mark">RL</span>
+        <span>Rider Logistics</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#platform">Platform</a>
+        <a href="#tracking">Tracking</a>
+        <a href="#safety">Safety</a>
+        <a href="#admin">Admin</a>
+      </nav>
+      <a class="header-action" href="#demo">View Workflow</a>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="eyebrow">SaaS logistics platform</p>
+          <h1 id="hero-title">Rider Logistics</h1>
+          <p class="hero-copy">
+            Real-time package pickup and delivery software for customers, drivers, and operations teams that need live availability, smarter dispatch, and safer handoffs.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-button" href="#platform">Explore the platform</a>
+            <a class="secondary-button" href="#tracking">See live tracking</a>
+          </div>
+          <div class="hero-metrics" aria-label="Platform highlights">
+            <div>
+              <strong>Live</strong>
+              <span>driver availability</span>
+            </div>
+            <div>
+              <strong>ETA</strong>
+              <span>pickup and drop-off tracking</span>
+            </div>
+            <div>
+              <strong>Safety</strong>
+              <span>offline and fraud alerts</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section intro" id="platform">
+        <div class="section-heading">
+          <p class="eyebrow">What it does</p>
+          <h2>One operating system for delivery visibility.</h2>
+          <p>
+            Rider Logistics connects customer booking, driver availability, route-matched dispatch, live driver tracking, and admin supervision in one production-ready workflow.
+          </p>
+        </div>
+        <div class="role-grid">
+          <article class="role-card">
+            <span class="icon">01</span>
+            <h3>Customers</h3>
+            <p>See nearby available drivers before booking, track the assigned driver after acceptance, and follow every movement from pickup to drop-off.</p>
+          </article>
+          <article class="role-card">
+            <span class="icon">02</span>
+            <h3>Drivers</h3>
+            <p>Go Online or Offline, broadcast live location only while online, receive requests, and accept single or route-matched delivery jobs.</p>
+          </article>
+          <article class="role-card">
+            <span class="icon">03</span>
+            <h3>Admins</h3>
+            <p>Monitor online drivers on a live map, filter by status and vehicle type, and flag risky behavior during active deliveries.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="feature-band" id="tracking">
+        <div class="feature-copy">
+          <p class="eyebrow">Live tracking</p>
+          <h2>Know who is available, where they are, and what happens next.</h2>
+          <p>
+            The platform updates driver status in real time. Online drivers can appear to customers, receive delivery requests, and move between AVAILABLE, BUSY, and ON_DELIVERY states. Offline drivers are hidden from customer discovery while admins retain last known location and last active time.
+          </p>
+          <ul class="check-list">
+            <li>Nearby driver discovery before checkout</li>
+            <li>Automatic customer tracking after assignment</li>
+            <li>ETA from acceptance to pickup and drop-off</li>
+            <li>Driver rating, vehicle type, and completed-job profile</li>
+          </ul>
+        </div>
+        <div class="tracking-panel" aria-label="Sample live tracking interface">
+          <div class="map-shell">
+            <span class="route-line route-one"></span>
+            <span class="route-line route-two"></span>
+            <span class="pin pickup">Pickup</span>
+            <span class="pin driver">Driver</span>
+            <span class="pin dropoff">Drop-off</span>
+          </div>
+          <div class="tracking-status">
+            <div>
+              <span class="status-dot"></span>
+              <strong>Driver online</strong>
+              <small>ON_DELIVERY / ETA 8 min</small>
+            </div>
+            <button type="button" data-demo-button>Refresh ETA</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section split" id="admin">
+        <div>
+          <p class="eyebrow">Admin command center</p>
+          <h2>Live map control for active operations.</h2>
+          <p>
+            Operations teams can see active online drivers, filter the fleet, identify active deliveries, and watch for drivers who go offline while holding packages.
+          </p>
+        </div>
+        <div class="admin-list">
+          <div class="admin-row">
+            <span>Vehicle filter</span>
+            <strong>Bike, car, van, truck</strong>
+          </div>
+          <div class="admin-row">
+            <span>Status filter</span>
+            <strong>AVAILABLE, BUSY, ON_DELIVERY, OFFLINE</strong>
+          </div>
+          <div class="admin-row">
+            <span>Risk filter</span>
+            <strong>Fraud score and delivery alerts</strong>
+          </div>
+          <div class="admin-row">
+            <span>Location filter</span>
+            <strong>Area, radius, rating, active job</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="safety-section" id="safety">
+        <div class="section-heading">
+          <p class="eyebrow">Fraud and safety rules</p>
+          <h2>Built to protect packages, customers, and trusted drivers.</h2>
+        </div>
+        <div class="safety-grid">
+          <article>
+            <h3>Offline during delivery</h3>
+            <p>If a driver goes offline while assigned to an active delivery, Rider Logistics creates an alert for admin review.</p>
+          </article>
+          <article>
+            <h3>Location disabled with package</h3>
+            <p>If location sharing is disabled while a package is in hand, the platform raises a safety warning and increases risk visibility.</p>
+          </article>
+          <article>
+            <h3>Contact harvesting pattern</h3>
+            <p>If a driver repeatedly goes online, collects customer contact, then cancels, the fraud score increases for investigation.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="workflow" id="demo">
+        <div class="section-heading">
+          <p class="eyebrow">End-to-end flow</p>
+          <h2>From booking to proof of delivery.</h2>
+        </div>
+        <div class="timeline">
+          <div>
+            <span>1</span>
+            <h3>Book</h3>
+            <p>Customer enters pickup, drop-off, item details, and sees nearby available drivers.</p>
+          </div>
+          <div>
+            <span>2</span>
+            <h3>Match</h3>
+            <p>The closest suitable online driver receives the delivery request and can accept it.</p>
+          </div>
+          <div>
+            <span>3</span>
+            <h3>Track</h3>
+            <p>Customer follows the driver live with ETA and status from acceptance to completion.</p>
+          </div>
+          <div>
+            <span>4</span>
+            <h3>Control</h3>
+            <p>Admins monitor drivers, active deliveries, location changes, and safety signals.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div>
+          <p class="eyebrow">Ready for operations</p>
+          <h2>Rider Logistics brings dispatch, tracking, and safety into one connected platform.</h2>
+        </div>
+        <a class="primary-button" href="#top">Back to top</a>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Rider Logistics</span>
+      <span>Real-time package pickup and delivery platform</span>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
