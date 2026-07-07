@@ -14,7 +14,7 @@ async function request<TResponse>(
 ): Promise<TResponse> {
   const { method = "GET", body } = options;
   const token = getToken();
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "https://rider-project.onrender.com/api";
   const url = path.startsWith("http") ? path : `${baseUrl}${path}`;
   const response = await fetch(url, {
     method,
