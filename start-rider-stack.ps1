@@ -53,13 +53,13 @@ Start-RiderProcess `
   -Name "customer" `
   -WorkingDirectory (Join-Path $root "rider-customer\build\web") `
   -Command "cmd.exe" `
-  -Arguments "/c py -m http.server 8081"
+  -Arguments "/c npx -y http-server -p 8081"
 
 Start-RiderProcess `
   -Name "driver" `
   -WorkingDirectory (Join-Path $root "rider_driver\build\web") `
   -Command "cmd.exe" `
-  -Arguments "/c py -m http.server 8082"
+  -Arguments "/c npx -y http-server -p 8082"
 
 Start-RiderProcess `
   -Name "prisma-studio" `
