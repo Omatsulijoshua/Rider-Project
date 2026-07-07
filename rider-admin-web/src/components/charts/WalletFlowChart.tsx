@@ -25,7 +25,7 @@ export default function WalletFlowChart({ data }: { data: TrendPoint[] }) {
           datasets: [
             {
               data: data.map((item) => item.value),
-              backgroundColor: ["#f97316", "#fb7185", "#38bdf8", "#2dd4bf"],
+              backgroundColor: ["#2563eb", "#10b981", "#f59e0b", "#ef4444"],
               borderWidth: 0,
             },
           ],

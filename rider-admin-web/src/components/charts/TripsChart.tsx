@@ -27,7 +27,7 @@ export default function TripsChart({ data }: { data: TrendPoint[] }) {
             {
               label: "Trips",
               data: data.map((item) => item.value),
-              backgroundColor: ["#0f766e", "#14b8a6", "#22c55e", "#84cc16", "#f59e0b", "#f97316"],
+              backgroundColor: ["#2563eb", "#0891b2", "#10b981", "#f59e0b", "#ef4444", "#7c3aed"],
               borderRadius: 10,
             },
           ],
