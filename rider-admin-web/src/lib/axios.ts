@@ -14,8 +14,7 @@ async function request<TResponse>(
 ): Promise<TResponse> {
   const { method = "GET", body } = options;
   const token = getToken();
-  // Point directly to the Nest JS backend API to bypass Next.js route handler proxying issues.
-  const baseUrl = "http://localhost:3000/api";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api";
   const url = path.startsWith("http") ? path : `${baseUrl}${path}`;
   const response = await fetch(url, {
     method,
