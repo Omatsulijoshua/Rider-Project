@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const backendBaseUrl = process.env.BACKEND_API_URL ?? "http://localhost:3000";
+const backendBaseUrl = process.env.BACKEND_API_URL ?? "https://rider-project.onrender.com";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
