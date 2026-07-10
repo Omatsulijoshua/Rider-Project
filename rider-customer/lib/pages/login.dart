@@ -11,8 +11,8 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final TextEditingController emailController = TextEditingController(text: 'joshuaomasul01@gmail.com');
-  final TextEditingController passwordController = TextEditingController(text: 'Jos@56567');
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   final BackendAuthService _authService = BackendAuthService();
   bool _isLoading = false;
 

@@ -50,4 +50,4 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: images/delivery-bike.png
+  image_path: images/app_icon.png

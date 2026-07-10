@@ -1,7 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart'; // for kDebugMode
 import 'package:flutter/material.dart';
-import 'package:device_preview/device_preview.dart';
 import 'package:rider/pages/launch.dart';
 
 import 'firebase_options.dart';
@@ -13,14 +11,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(
-    kDebugMode
-        ? DevicePreview(
-            enabled: true,
-            builder: (context) => const MyApp(),
-          )
-        : const MyApp(),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -29,11 +20,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // DevicePreview ONLY in debug mode
-      locale: kDebugMode ? DevicePreview.locale(context) : null,
-      builder: kDebugMode ? DevicePreview.appBuilder : null,
-      useInheritedMediaQuery: kDebugMode,
-
       debugShowCheckedModeBanner: false,
       title: 'Rider',
 

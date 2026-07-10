@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg: #f5f7fb;
   --bg-soft: #edf2f7;
   --sidebar: #101820;
@@ -92,6 +92,18 @@ select:focus {
     var(--sidebar);
   color: var(--text-inverse);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
 }
 
 .brand {
