@@ -34,7 +34,7 @@ class _ChatPageState extends State<ChatPage> {
 
   void _initSocket() {
     // Assuming backend is at this URL
-    _socket = IO.io('http://localhost:3000', <String, dynamic>{
+    _socket = IO.io('https://rider-project.onrender.com', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
     });

@@ -33,7 +33,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _initSocket() {
-    _socket = IO.io('http://localhost:3000', <String, dynamic>{
+    _socket = IO.io('https://rider-project.onrender.com', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
     });

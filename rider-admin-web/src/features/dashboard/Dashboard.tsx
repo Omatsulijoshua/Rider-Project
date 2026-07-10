@@ -590,7 +590,7 @@ export default function Dashboard() {
               <div className="list-row">
                 <div>
                   <strong>Proxy route</strong>
-                  <p className="muted-copy">/api/admin {"->"} backend on localhost:3000</p>
+                  <p className="muted-copy">/api/admin {"->"} backend on Render</p>
                 </div>
                 <Badge tone={consoleData ? "success" : "warning"}>
                   {consoleData ? "live" : "idle"}
