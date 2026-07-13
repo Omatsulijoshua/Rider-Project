@@ -28,7 +28,38 @@ Place a new order.
 Monitor Communication:
 Open the Chrome Console (F12) in both browser windows.
 In the Rider app console, you should see: 🛠️ BACKEND DEBUG: 🔍 Found 1 available drivers in DB.
-The Driver app will then immediately show the "New Order Request" dialog.
 The system is now fully synchronized. Please follow the Logout/Login step in the Driver app once more to ensure your profile is fully "repaired" in the database!
 
-10:19 PM
+---
+
+## 🔑 Pre-Configured Test Accounts
+
+You can use these accounts to log in, place orders, and test the applications:
+
+### 1. Admin Account (for Admin Web Dashboard)
+Use these credentials on [rider-admin-web.vercel.app](https://rider-admin-web.vercel.app):
+- **Email**: `joshuaomatsuli01@gmail.com`
+- **Password**: `Admin@123456`
+- **Phone**: `+2348123456789`
+
+### 2. Customer Accounts (for Customer App / Web)
+Use any of these on [rider-customer-web.vercel.app](https://rider-customer-web.vercel.app):
+
+| Name | Email | Password | Phone |
+| :--- | :--- | :--- | :--- |
+| **Customer 1** | `customer1@rider.com` | `Password123` | `+2348123456781` |
+| **Customer 2** | `customer2@rider.com` | `Password123` | `+2348123456782` |
+| **Customer 3** | `customer3@rider.com` | `Password123` | `+2348123456783` |
+| **Customer 4** | `customer4@rider.com` | `Password123` | `+2348123456784` |
+| **Customer 5** | `customer5@rider.com` | `Password123` | `+2348123456785` |
+
+### 3. Driver Accounts (for Driver App / Web)
+Use any of these on [rider-driver-web.vercel.app](https://rider-driver-web.vercel.app):
+
+| Name | Email | Password | Phone |
+| :--- | :--- | :--- | :--- |
+| **Driver 1** | `driver1@rider.com` | `Password123` | `+2349133456781` |
+| **Driver 2** | `driver2@rider.com` | `Password123` | `+2349133456782` |
+| **Driver 3** | `driver3@rider.com` | `Password123` | `+2349133456783` |
+| **Driver 4** | `driver4@rider.com` | `Password123` | `+2349133456784` |
+| **Driver 5** | `driver5@rider.com` | `Password123` | `+2349133456785` |
