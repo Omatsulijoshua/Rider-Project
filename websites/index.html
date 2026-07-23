@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Rider Logistics | Real-Time Package Pickup and Delivery</title>
+    <title>Rider Logistics | Track, Ship, and Manage Deliveries</title>
     <meta
       name="description"
-      content="Rider Logistics is a real-time SaaS platform for package pickup, delivery tracking, driver availability, route-matched jobs, and admin safety oversight."
+      content="Rider Logistics helps customers track shipments, book package pickup, manage express delivery, and monitor real-time driver availability from one platform."
     />
     <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="stylesheet" href="styles.css" />
@@ -18,26 +18,26 @@
         <span>Rider Logistics</span>
       </a>
       <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#track">Track</a>
+        <a href="#services">Services</a>
         <a href="#platform">Platform</a>
-        <a href="#tracking">Tracking</a>
-        <a href="#safety">Safety</a>
+        <a href="#support">Support</a>
         <a href="#admin">Admin</a>
       </nav>
-      <a class="header-action" href="#demo">View Workflow</a>
+      <a class="header-action" href="#track">Track Shipment</a>
     </header>
 
     <main id="top">
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-overlay"></div>
         <div class="hero-content">
-          <p class="eyebrow">SaaS logistics platform</p>
-          <h1 id="hero-title">Rider Logistics</h1>
+          <p class="eyebrow">Pickup, delivery, and live tracking</p>
+          <h1 id="hero-title">Move packages with real-time confidence.</h1>
           <p class="hero-copy">
-            Real-time package pickup and delivery software for customers, drivers, and operations teams that need live availability, smarter dispatch, and safer handoffs.
+            Rider Logistics gives customers, stores, riders, and operations teams one place to book deliveries, track shipments, verify drivers, and manage every handoff.
           </p>
           <div class="hero-actions">
-            <a class="primary-button" href="#platform">Explore the platform</a>
-            <a class="secondary-button" href="#tracking">See live tracking</a>
+            <a class="primary-button" href="#track">Track a package</a>
+            <a class="secondary-button" href="#services">Explore services</a>
           </div>
           <div class="hero-metrics" aria-label="Platform highlights">
             <div>
@@ -49,10 +49,92 @@
               <span>pickup and drop-off tracking</span>
             </div>
             <div>
-              <strong>Safety</strong>
-              <span>offline and fraud alerts</span>
+              <strong>Secure</strong>
+              <span>safety alerts and proof of delivery</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="track-section" id="track" aria-labelledby="track-title">
+        <div class="track-copy">
+          <p class="eyebrow">Track and trace</p>
+          <h2 id="track-title">Enter your tracking number.</h2>
+          <p>
+            Follow a shipment from request to pickup, in-transit movement, destination arrival, and proof of delivery. Try the sample ID below to preview the experience.
+          </p>
+        </div>
+        <div class="tracking-console">
+          <form class="track-form" data-track-form>
+            <label for="tracking-number">Tracking number</label>
+            <div>
+              <input id="tracking-number" name="tracking" placeholder="Example: RID-2026-LAG-4821" autocomplete="off" />
+              <button type="submit">Track</button>
+            </div>
+            <small>Use your Rider tracking ID from booking confirmation or delivery receipt.</small>
+          </form>
+          <div class="shipment-card" data-tracking-result>
+            <div class="shipment-card__top">
+              <span class="status-dot"></span>
+              <div>
+                <strong>RID-2026-LAG-4821</strong>
+                <p>Driver assigned / ETA 12 min to pickup</p>
+              </div>
+            </div>
+            <div class="shipment-progress" aria-label="Shipment progress">
+              <span class="is-done">Booked</span>
+              <span class="is-active">Pickup</span>
+              <span>In transit</span>
+              <span>Delivered</span>
+            </div>
+            <ul class="shipment-events">
+              <li><strong>Now</strong><span>Rider is moving toward pickup address.</span></li>
+              <li><strong>08:42</strong><span>Delivery request accepted by an online driver.</span></li>
+              <li><strong>08:35</strong><span>Package booking created by customer.</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section services" id="services">
+        <div class="section-heading">
+          <p class="eyebrow">Services and solutions</p>
+          <h2>Delivery options for individuals, online sellers, and enterprise teams.</h2>
+          <p>
+            Rider Logistics supports quick local errands, store fulfillment, business dispatch, scheduled pickups, and high-volume delivery operations.
+          </p>
+        </div>
+        <div class="service-grid">
+          <article>
+            <span>01</span>
+            <h3>Last-mile delivery</h3>
+            <p>Fast pickup and delivery for customer orders, personal packages, and store-to-door fulfillment.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Express delivery</h3>
+            <p>Priority dispatch for urgent parcels with live rider movement, ETA, and delivery confirmation.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>B2B delivery</h3>
+            <p>Reliable movement between shops, warehouses, vendors, offices, and business customers.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Bulk shipping</h3>
+            <p>Coordinate multiple packages, route-matched jobs, and driver capacity for larger delivery runs.</p>
+          </article>
+          <article>
+            <span>05</span>
+            <h3>Warehouse dispatch</h3>
+            <p>Prepare order batches, assign drivers, and monitor pickups from storage locations or fulfillment hubs.</p>
+          </article>
+          <article>
+            <span>06</span>
+            <h3>Developer API</h3>
+            <p>Connect ecommerce, merchant, or internal systems to booking, tracking, and delivery status updates.</p>
+          </article>
         </div>
       </section>
 
@@ -125,22 +207,34 @@
           </p>
         </div>
         <div class="admin-list">
-          <div class="admin-row">
-            <span>Vehicle filter</span>
-            <strong>Bike, car, van, truck</strong>
-          </div>
-          <div class="admin-row">
-            <span>Status filter</span>
-            <strong>AVAILABLE, BUSY, ON_DELIVERY, OFFLINE</strong>
-          </div>
-          <div class="admin-row">
-            <span>Risk filter</span>
-            <strong>Fraud score and delivery alerts</strong>
-          </div>
-          <div class="admin-row">
-            <span>Location filter</span>
-            <strong>Area, radius, rating, active job</strong>
-          </div>
+          <div class="admin-row"><span>Vehicle filter</span><strong>Bike, car, van, truck</strong></div>
+          <div class="admin-row"><span>Status filter</span><strong>AVAILABLE, BUSY, ON_DELIVERY, OFFLINE</strong></div>
+          <div class="admin-row"><span>Risk filter</span><strong>Fraud score and delivery alerts</strong></div>
+          <div class="admin-row"><span>Location filter</span><strong>Area, radius, rating, active job</strong></div>
+        </div>
+      </section>
+
+      <section class="support-section" id="support">
+        <div class="section-heading">
+          <p class="eyebrow">Service and support</p>
+          <h2>Help for every delivery stage.</h2>
+        </div>
+        <div class="support-grid">
+          <article>
+            <h3>Contact support</h3>
+            <p>Get help with booking, tracking IDs, driver assignment, failed delivery attempts, or payment questions.</p>
+            <a href="mailto:support@riderlogistics.example">Email support</a>
+          </article>
+          <article>
+            <h3>Find a service point</h3>
+            <p>Set pickup zones, merchant hubs, fulfillment points, and handoff locations for your delivery network.</p>
+            <a href="#admin">View operations tools</a>
+          </article>
+          <article>
+            <h3>Download the apps</h3>
+            <p>Customers track packages automatically, while drivers manage availability and delivery requests in real time.</p>
+            <a href="#track">Start with tracking</a>
+          </article>
         </div>
       </section>
 
@@ -150,18 +244,9 @@
           <h2>Built to protect packages, customers, and trusted drivers.</h2>
         </div>
         <div class="safety-grid">
-          <article>
-            <h3>Offline during delivery</h3>
-            <p>If a driver goes offline while assigned to an active delivery, Rider Logistics creates an alert for admin review.</p>
-          </article>
-          <article>
-            <h3>Location disabled with package</h3>
-            <p>If location sharing is disabled while a package is in hand, the platform raises a safety warning and increases risk visibility.</p>
-          </article>
-          <article>
-            <h3>Contact harvesting pattern</h3>
-            <p>If a driver repeatedly goes online, collects customer contact, then cancels, the fraud score increases for investigation.</p>
-          </article>
+          <article><h3>Offline during delivery</h3><p>If a driver goes offline while assigned to an active delivery, Rider Logistics creates an alert for admin review.</p></article>
+          <article><h3>Location disabled with package</h3><p>If location sharing is disabled while a package is in hand, the platform raises a safety warning and increases risk visibility.</p></article>
+          <article><h3>Contact harvesting pattern</h3><p>If a driver repeatedly goes online, collects customer contact, then cancels, the fraud score increases for investigation.</p></article>
         </div>
       </section>
 
@@ -171,26 +256,10 @@
           <h2>From booking to proof of delivery.</h2>
         </div>
         <div class="timeline">
-          <div>
-            <span>1</span>
-            <h3>Book</h3>
-            <p>Customer enters pickup, drop-off, item details, and sees nearby available drivers.</p>
-          </div>
-          <div>
-            <span>2</span>
-            <h3>Match</h3>
-            <p>The closest suitable online driver receives the delivery request and can accept it.</p>
-          </div>
-          <div>
-            <span>3</span>
-            <h3>Track</h3>
-            <p>Customer follows the driver live with ETA and status from acceptance to completion.</p>
-          </div>
-          <div>
-            <span>4</span>
-            <h3>Control</h3>
-            <p>Admins monitor drivers, active deliveries, location changes, and safety signals.</p>
-          </div>
+          <div><span>1</span><h3>Book</h3><p>Customer enters pickup, drop-off, item details, and sees nearby available drivers.</p></div>
+          <div><span>2</span><h3>Match</h3><p>The closest suitable online driver receives the delivery request and can accept it.</p></div>
+          <div><span>3</span><h3>Track</h3><p>Customer follows the driver live with ETA and status from acceptance to completion.</p></div>
+          <div><span>4</span><h3>Control</h3><p>Admins monitor drivers, active deliveries, location changes, and safety signals.</p></div>
         </div>
       </section>
 
@@ -199,13 +268,21 @@
           <p class="eyebrow">Ready for operations</p>
           <h2>Rider Logistics brings dispatch, tracking, and safety into one connected platform.</h2>
         </div>
-        <a class="primary-button" href="#top">Back to top</a>
+        <a class="primary-button" href="#track">Track shipment</a>
       </section>
     </main>
 
     <footer class="site-footer">
-      <span>Rider Logistics</span>
-      <span>Real-time package pickup and delivery platform</span>
+      <div>
+        <strong>Rider Logistics</strong>
+        <span>Real-time package pickup and delivery platform</span>
+      </div>
+      <div class="footer-links">
+        <a href="#services">Services</a>
+        <a href="#track">Track Shipment</a>
+        <a href="#support">Support</a>
+        <a href="#admin">Admin</a>
+      </div>
     </footer>
 
     <script src="script.js"></script>
